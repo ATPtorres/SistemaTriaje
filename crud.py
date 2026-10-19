@@ -21,11 +21,14 @@ from models_db import (
 # PACIENTES
 # =============================================================================
 
-def crear_paciente(db: Session, datos: dict) -> Paciente:
+def crear_paciente(db: Session, datos: dict, *, commit: bool = True) -> Paciente:
     """Crea un nuevo paciente en la base de datos."""
     db_paciente = Paciente(**datos)
     db.add(db_paciente)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     db.refresh(db_paciente)
     return db_paciente
 
@@ -42,15 +45,15 @@ def obtener_paciente_por_externo(db: Session, id_externo: str) -> Paciente | Non
 
 def listar_pacientes(db: Session, skip: int = 0, limit: int = 100) -> list[Paciente]:
     """Lista todos los pacientes con paginacion."""
-    return db.query(Paciente).offset(skip).limit(limit).all()
+    return db.query(Paciente).order_by(Paciente.id).offset(skip).limit(limit).all()
 
 
-def buscar_pacientes(db: Session, termino: str) -> list[Paciente]:
+def buscar_pacientes(db: Session, termino: str, skip: int = 0, limit: int = 100) -> list[Paciente]:
     """Busca pacientes por nombre o ID externo."""
     return db.query(Paciente).filter(
         (Paciente.nombre.ilike(f"%{termino}%")) |
         (Paciente.id_externo.ilike(f"%{termino}%"))
-    ).all()
+    ).order_by(Paciente.id).offset(skip).limit(limit).all()
 
 
 def actualizar_paciente(db: Session, paciente_id: int, datos: dict) -> Paciente | None:
@@ -81,13 +84,16 @@ def eliminar_paciente(db: Session, paciente_id: int) -> bool:
 # =============================================================================
 
 def crear_evaluacion(db: Session, datos: dict, paciente_id: int,
-                     id_evaluacion: str) -> EvaluacionTriaje:
+                     id_evaluacion: str, *, commit: bool = True) -> EvaluacionTriaje:
     """Crea una nueva evaluacion de triaje."""
     datos["paciente_id"] = paciente_id
     datos["id_evaluacion"] = id_evaluacion
     db_eval = EvaluacionTriaje(**datos)
     db.add(db_eval)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     db.refresh(db_eval)
     return db_eval
 
@@ -107,12 +113,14 @@ def obtener_evaluacion_por_uuid(db: Session, id_evaluacion: str) -> EvaluacionTr
 
 
 def listar_evaluaciones(db: Session, skip: int = 0, limit: int = 100,
-                       paciente_id: int | None = None) -> list[EvaluacionTriaje]:
+                       paciente_id: int | None = None, nivel: int | None = None) -> list[EvaluacionTriaje]:
     """Lista evaluaciones con filtro opcional por paciente."""
     query = db.query(EvaluacionTriaje)
     if paciente_id:
         query = query.filter(EvaluacionTriaje.paciente_id == paciente_id)
-    return query.order_by(desc(EvaluacionTriaje.fecha_evaluacion)).offset(skip).limit(limit).all()
+    if nivel is not None:
+        query = query.filter(EvaluacionTriaje.nivel_prioridad == nivel)
+    return query.order_by(desc(EvaluacionTriaje.fecha_evaluacion), desc(EvaluacionTriaje.id)).offset(skip).limit(limit).all()
 
 
 def obtener_evaluaciones_por_nivel(db: Session, nivel: int) -> list[EvaluacionTriaje]:
@@ -134,12 +142,15 @@ def contar_evaluaciones_hoy(db: Session) -> int:
 # SIGNOS VITALES
 # =============================================================================
 
-def crear_signos_vitales(db: Session, datos: dict, evaluacion_id: int) -> SignosVitalesHistorial:
+def crear_signos_vitales(db: Session, datos: dict, evaluacion_id: int, *, commit: bool = True) -> SignosVitalesHistorial:
     """Registra signos vitales para una evaluacion."""
     datos["evaluacion_id"] = evaluacion_id
     db_sv = SignosVitalesHistorial(**datos)
     db.add(db_sv)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     db.refresh(db_sv)
     return db_sv
 
@@ -169,7 +180,7 @@ def crear_alerta(db: Session, datos: dict, evaluacion_id: int) -> AlertaGenerada
     return db_alerta
 
 
-def crear_alertas_batch(db: Session, alertas: list[dict], evaluacion_id: int) -> list[AlertaGenerada]:
+def crear_alertas_batch(db: Session, alertas: list[dict], evaluacion_id: int, *, commit: bool = True) -> list[AlertaGenerada]:
     """Crea multiples alertas en lote."""
     db_alertas = []
     for alerta in alertas:
@@ -177,7 +188,10 @@ def crear_alertas_batch(db: Session, alertas: list[dict], evaluacion_id: int) ->
         db_alerta = AlertaGenerada(**alerta)
         db.add(db_alerta)
         db_alertas.append(db_alerta)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     for a in db_alertas:
         db.refresh(a)
     return db_alertas
@@ -195,7 +209,7 @@ def obtener_alertas_evaluacion(db: Session, evaluacion_id: int) -> list[AlertaGe
 # =============================================================================
 
 def crear_diagnosticos_batch(db: Session, diagnosticos: list[dict],
-                            evaluacion_id: int) -> list[DiagnosticoSugerido]:
+                            evaluacion_id: int, *, commit: bool = True) -> list[DiagnosticoSugerido]:
     """Crea multiples diagnosticos sugeridos."""
     db_diags = []
     for diag in diagnosticos:
@@ -203,7 +217,10 @@ def crear_diagnosticos_batch(db: Session, diagnosticos: list[dict],
         db_diag = DiagnosticoSugerido(**diag)
         db.add(db_diag)
         db_diags.append(db_diag)
-    db.commit()
+    if commit:
+        db.commit()
+    else:
+        db.flush()
     for d in db_diags:
         db.refresh(d)
     return db_diags

@@ -12,5 +12,8 @@ node_modules/
 *.db
 *.sqlite
 *.sqlite3
+*.db-shm
+*.db-wal
+pytest-cache-files-*/
 # Proyecto independiente, ajeno al sistema de triaje.
 /control-acceso/

@@ -47,11 +47,9 @@ def main():
     
     print()
     print("[4] Verificando conexion final...")
-    from sqlalchemy import text
-    with engine.connect() as conn:
-        result = conn.execute(text("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'triaje_sistema'"))
-        count = result.scalar()
-        print(f"     [OK] {count} tablas en la base de datos")
+    from sqlalchemy import inspect
+    count = len(inspect(engine).get_table_names())
+    print(f"     [OK] {count} tablas en la base de datos configurada")
     
     print()
     print("=" * 60)

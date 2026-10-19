@@ -8,26 +8,26 @@ Uso:
     from database import get_db, engine, Base
 """
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+load_dotenv(Path(__file__).with_name(".env"))
 
 # =============================================================================
 # CONFIGURACION DE CONEXION
 # =============================================================================
 
 # URL de conexion: mysql+pymysql://usuario:password@host:puerto/base_datos
-DATABASE_URL = "mysql+pymysql://root:@localhost:3306/triaje_sistema"
+DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost:3306/triaje_sistema")
 
 # Crear engine con pool de conexiones
-engine = create_engine(
-    DATABASE_URL,
-    pool_pre_ping=True,        # Verificar conexion antes de usar
-    pool_size=10,               # Maximo de conexiones en el pool
-    max_overflow=20,            # Conexiones extra permitidas
-    pool_recycle=3600,          # Reciclar conexiones cada hora
-    echo=False                  # True para log de SQL (debug)
-)
+engine_options = {"pool_pre_ping": True, "pool_recycle": 3600}
+if not DATABASE_URL.startswith("sqlite:"):
+    engine_options.update(pool_size=10, max_overflow=20)
+engine = create_engine(DATABASE_URL, **engine_options)
 
 # Crear fabrica de sesiones
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -52,6 +52,9 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 

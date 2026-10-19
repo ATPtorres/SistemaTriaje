@@ -74,7 +74,6 @@ def test_nivel_1_resucitacion():
     assert resultado.nivel_prioridad == 1, f"Esperado nivel 1, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Rojo"
     print("  [PASS] ASSERT PASSED: Nivel 1 asignado correctamente")
-    return resultado
 
 
 def test_nivel_2_emergencia():
@@ -104,7 +103,6 @@ def test_nivel_2_emergencia():
     assert resultado.nivel_prioridad == 2, f"Esperado nivel 2, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Naranja"
     print("  [PASS] ASSERT PASSED: Nivel 2 asignado correctamente")
-    return resultado
 
 
 def test_nivel_2_emergencia_conciencia():
@@ -130,7 +128,6 @@ def test_nivel_2_emergencia_conciencia():
     assert resultado.nivel_prioridad == 2, f"Esperado nivel 2, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Naranja"
     print("  [PASS] ASSERT PASSED: Nivel 2 asignado correctamente")
-    return resultado
 
 
 def test_nivel_3_urgente():
@@ -157,7 +154,6 @@ def test_nivel_3_urgente():
     assert resultado.nivel_prioridad == 3, f"Esperado nivel 3, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Amarillo"
     print("  [PASS] ASSERT PASSED: Nivel 3 asignado correctamente")
-    return resultado
 
 
 def test_nivel_4_menos_urgente():
@@ -183,7 +179,6 @@ def test_nivel_4_menos_urgente():
     assert resultado.nivel_prioridad == 4, f"Esperado nivel 4, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Verde"
     print("  [PASS] ASSERT PASSED: Nivel 4 asignado correctamente")
-    return resultado
 
 
 def test_nivel_5_no_urgente():
@@ -209,7 +204,6 @@ def test_nivel_5_no_urgente():
     assert resultado.nivel_prioridad == 5, f"Esperado nivel 5, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Azul"
     print("  [PASS] ASSERT PASSED: Nivel 5 asignado correctamente")
-    return resultado
 
 
 # =============================================================================
@@ -239,7 +233,6 @@ def test_nivel_1_sangrado():
     assert resultado.nivel_prioridad == 1, f"Esperado nivel 1, obtenido {resultado.nivel_prioridad}"
     assert resultado.color == "Rojo"
     print("  [PASS] ASSERT PASSED: Nivel 1 asignado correctamente")
-    return resultado
 
 
 # =============================================================================

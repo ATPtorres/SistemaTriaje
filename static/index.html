@@ -1286,7 +1286,12 @@ function showResult(d, silent) {
     const al = document.getElementById('resAlertas');
     if (d.signos_alerta && d.signos_alerta.length) {
         ar.style.display = 'block';
-        al.innerHTML = d.signos_alerta.map(a => '<span class="alert-tag">' + a + '</span>').join('');
+        al.replaceChildren(...d.signos_alerta.map(a => {
+            const tag = document.createElement('span');
+            tag.className = 'alert-tag';
+            tag.textContent = a;
+            return tag;
+        }));
     } else ar.style.display = 'none';
 
     if (!silent) sec.classList.add('visible');
@@ -1301,14 +1306,25 @@ function pushHistory(d) {
 function renderHistory() {
     const el = document.getElementById('historyStrip');
     if (!history.length) { el.innerHTML = '<div class="empty-hist">' + t('sin_evals') + '</div>'; return; }
-    const t = new Date().toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
-    el.innerHTML = history.map((h, i) =>
-        '<div class="history-chip" onclick="showResult(history[' + i + '])">' +
-            '<div class="history-chip-dot" style="background:' + dotMap[h.nivel_prioridad] + '"></div>' +
-            '<span class="history-chip-id">' + h.id_paciente + '</span>' +
-            '<span class="history-chip-badge" style="color:' + txMap[h.nivel_prioridad] + ';background:' + dotMap[h.nivel_prioridad] + '18">N' + h.nivel_prioridad + '</span>' +
-        '</div>'
-    ).join('');
+    el.replaceChildren(...history.map(h => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'history-chip';
+        chip.addEventListener('click', () => showResult(h));
+        const dot = document.createElement('span');
+        dot.className = 'history-chip-dot';
+        dot.style.background = dotMap[h.nivel_prioridad];
+        const id = document.createElement('span');
+        id.className = 'history-chip-id';
+        id.textContent = h.id_paciente;
+        const badge = document.createElement('span');
+        badge.className = 'history-chip-badge';
+        badge.style.color = txMap[h.nivel_prioridad];
+        badge.style.background = dotMap[h.nivel_prioridad] + '18';
+        badge.textContent = 'N' + h.nivel_prioridad;
+        chip.append(dot, id, badge);
+        return chip;
+    }));
 }
 </script>
 </body>

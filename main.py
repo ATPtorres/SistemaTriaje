@@ -17,13 +17,16 @@ Documentacion Swagger:
     http://localhost:8000/docs
 """
 
+import logging
+from contextlib import asynccontextmanager
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import uuid
 import time
 import json
 from pathlib import Path
 from datetime import datetime, timezone
 from fastapi import FastAPI, HTTPException, Depends, Query
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
@@ -50,7 +53,18 @@ STATIC_DIR = Path(__file__).parent / "static"
 # CONFIGURACION DE LA APLICACION
 # =============================================================================
 
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    logger.info("Base de datos inicializada correctamente")
+    yield
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title="Sistema Experto de Triaje Medico",
     description=(
         "Sistema Experto completo con MySQL para clasificacion automatizada de pacientes "
@@ -66,13 +80,6 @@ app = FastAPI(
 # EVENTOS DE ARRANQUE
 # =============================================================================
 
-@app.on_event("startup")
-def startup_event():
-    """Inicializa la base de datos al arrancar el servidor."""
-    init_db()
-    print("Base de datos inicializada correctamente")
-
-
 # =============================================================================
 # ENDPOINTS DE TRIAJE (principal)
 # =============================================================================
@@ -84,7 +91,7 @@ def startup_event():
     tags=["Triaje"],
     responses={200: {"model": ResultadoTriaje}, 422: {"description": "Error de validacion"}, 500: {"description": "Error interno"}}
 )
-async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
+def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
     """
     Endpoint principal del Sistema Experto de Triaje.
     
@@ -95,7 +102,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
     4. Soporte clinico -> Diagnosticos diferenciales + Protocolos
     5. Guardar todo en MySQL
     """
-    inicio = time.time()
+    inicio = time.perf_counter()
 
     try:
         # Paso 1: Motor de reglas clasico
@@ -122,7 +129,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
 
         # Paso 5: Guardar en MySQL
         id_eval = f"EVAL-{uuid.uuid4().hex[:12].upper()}"
-        duracion_ms = int((time.time() - inicio) * 1000)
+        duracion_ms = int((time.perf_counter() - inicio) * 1000)
 
         # Buscar o crear paciente
         db_paciente = crud.obtener_paciente_por_externo(db, paciente.id_paciente)
@@ -131,7 +138,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
                 "id_externo": paciente.id_paciente,
                 "edad": paciente.edad,
                 "peso_kg": paciente.peso_kg
-            })
+            }, commit=False)
 
         # Guardar evaluacion
         eval_data = {
@@ -155,7 +162,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
             "datos_entrada": datos_paciente,
             "duracion_ms": duracion_ms,
         }
-        db_eval = crud.crear_evaluacion(db, eval_data, db_paciente.id, id_eval)
+        db_eval = crud.crear_evaluacion(db, eval_data, db_paciente.id, id_eval, commit=False)
 
         # Guardar signos vitales
         crud.crear_signos_vitales(db, {
@@ -165,7 +172,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
             "temperatura": paciente.signos_vitales.temperatura,
             "saturacion_oxigeno": paciente.signos_vitales.saturacion_oxigeno,
             "nivel_conciencia": paciente.nivel_conciencia.value,
-        }, db_eval.id)
+        }, db_eval.id, commit=False)
 
         # Guardar alertas
         if resultado.signos_alerta:
@@ -176,7 +183,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
                     "descripcion": alerta,
                     "nivel_gravedad": resultado.nivel_prioridad,
                 })
-            crud.crear_alertas_batch(db, alertas_data, db_eval.id)
+            crud.crear_alertas_batch(db, alertas_data, db_eval.id, commit=False)
 
         # Guardar diagnosticos
         if soporte.get("diagnosticos"):
@@ -191,7 +198,7 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
                     "estudios_sugeridos": d.get("estudios_sugeridos"),
                     "conducta": d.get("conducta"),
                 })
-            crud.crear_diagnosticos_batch(db, diag_mapped, db_eval.id)
+            crud.crear_diagnosticos_batch(db, diag_mapped, db_eval.id, commit=False)
 
         # Enriquecer resultado
         resultado.score_riesgo_difuso = round(score_difuso, 1)
@@ -215,12 +222,23 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
         idioma = getattr(paciente, "idioma", "es")
         resultado = traducir_resultado(resultado, idioma)
 
+        db.commit()
         return resultado
 
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Conflicto al guardar el paciente; vuelva a intentar.")
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Error al guardar la evaluacion de triaje")
+        raise HTTPException(status_code=503, detail="No se pudo guardar la evaluacion. Intente nuevamente.")
     except ValidationError as e:
-        raise HTTPException(status_code=422, detail=f"Error de validacion: {str(e)}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error interno: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=422, detail="Datos de evaluacion no validos")
+    except Exception:
+        db.rollback()
+        logger.exception("Error interno en la evaluacion de triaje")
+        raise HTTPException(status_code=500, detail="No se pudo completar la evaluacion.")
 
 
 # =============================================================================
@@ -228,17 +246,22 @@ async def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get
 # =============================================================================
 
 @app.post("/pacientes", tags=["Pacientes"], summary="Crear paciente")
-async def crear_paciente_endpoint(datos: PacienteCreate, db: Session = Depends(get_db)):
+def crear_paciente_endpoint(datos: PacienteCreate, db: Session = Depends(get_db)):
     """Crea un nuevo paciente en la base de datos."""
     try:
         paciente = crud.crear_paciente(db, datos.model_dump(exclude_unset=True))
         return {"mensaje": "Paciente creado", "id": paciente.id, "id_externo": paciente.id_externo}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Ya existe un paciente con ese identificador.")
+    except SQLAlchemyError:
+        db.rollback()
+        logger.exception("Error al crear paciente")
+        raise HTTPException(status_code=503, detail="No se pudo guardar el paciente.")
 
 
 @app.get("/pacientes", tags=["Pacientes"], summary="Listar pacientes")
-async def listar_pacientes_endpoint(
+def listar_pacientes_endpoint(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     buscar: str = Query(None, description="Buscar por nombre o ID"),
@@ -246,7 +269,7 @@ async def listar_pacientes_endpoint(
 ):
     """Lista todos los pacientes con paginacion y busqueda."""
     if buscar:
-        pacientes = crud.buscar_pacientes(db, buscar)
+        pacientes = crud.buscar_pacientes(db, buscar, skip, limit)
     else:
         pacientes = crud.listar_pacientes(db, skip, limit)
     return {"total": len(pacientes), "pacientes": [
@@ -257,7 +280,7 @@ async def listar_pacientes_endpoint(
 
 
 @app.get("/pacientes/{paciente_id}", tags=["Pacientes"], summary="Obtener paciente")
-async def obtener_paciente_endpoint(paciente_id: int, db: Session = Depends(get_db)):
+def obtener_paciente_endpoint(paciente_id: int, db: Session = Depends(get_db)):
     """Obtiene un paciente por su ID."""
     paciente = crud.obtener_paciente_por_id(db, paciente_id)
     if not paciente:
@@ -271,19 +294,15 @@ async def obtener_paciente_endpoint(paciente_id: int, db: Session = Depends(get_
 # =============================================================================
 
 @app.get("/evaluaciones", tags=["Evaluaciones"], summary="Listar evaluaciones")
-async def listar_evaluaciones_endpoint(
+def listar_evaluaciones_endpoint(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    paciente_id: int = Query(None),
+    paciente_id: int | None = Query(None, ge=1),
     nivel: int = Query(None, ge=1, le=5),
     db: Session = Depends(get_db)
 ):
     """Lista evaluaciones con filtros opcionales."""
-    if nivel:
-        evals = crud.obtener_evaluaciones_por_nivel(db, nivel)
-        evals = evals[skip:skip + limit]
-    else:
-        evals = crud.listar_evaluaciones(db, skip, limit, paciente_id)
+    evals = crud.listar_evaluaciones(db, skip, limit, paciente_id, nivel)
 
     return {"total": len(evals), "evaluaciones": [
         {
@@ -298,7 +317,7 @@ async def listar_evaluaciones_endpoint(
 
 
 @app.get("/evaluaciones/{evaluacion_id}", tags=["Evaluaciones"], summary="Detalle de evaluacion")
-async def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(get_db)):
+def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(get_db)):
     """Obtiene el detalle completo de una evaluacion (por ID interno o UUID)."""
     if evaluacion_id.isdigit():
         eval_db = crud.obtener_evaluacion(db, int(evaluacion_id))
@@ -358,7 +377,7 @@ async def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(
 # =============================================================================
 
 @app.get("/knowledge-base", summary="Consultar base de conocimiento", tags=["Conocimiento"])
-async def consultar_base_conocimiento():
+def consultar_base_conocimiento():
     """Retorna todas las reglas de la base de conocimiento del sistema experto."""
     kb = BaseConocimiento()
     return {
@@ -369,7 +388,7 @@ async def consultar_base_conocimiento():
 
 
 @app.get("/decision-tree", summary="Arbol de decision visual", tags=["Conocimiento"])
-async def arbol_decision():
+def arbol_decision():
     """Retorna el arbol de decision serializado para visualizacion."""
     kb = BaseConocimiento()
 
@@ -387,7 +406,7 @@ async def arbol_decision():
 
 
 @app.get("/protocols", summary="Protocolos de triaje disponibles", tags=["Conocimiento"])
-async def listar_protocolos():
+def listar_protocolos():
     """Lista los protocolos de triaje implementados en el sistema."""
     return {
         "protocolos": [
@@ -400,7 +419,7 @@ async def listar_protocolos():
 
 
 @app.get("/fuzzy-membership", summary="Funciones de pertenencia difusas", tags=["Conocimiento"])
-async def funciones_pertenencia():
+def funciones_pertenencia():
     """Retorna las funciones de pertenencia de las variables linguisticas difusas."""
     from fuzzy_engine import crear_sistema_difuso_triaje
     motor = crear_sistema_difuso_triaje()
@@ -426,15 +445,15 @@ async def funciones_pertenencia():
 # =============================================================================
 
 @app.get("/statistics", summary="Estadisticas del sistema (MySQL)", tags=["Analytics"])
-async def estadisticas_sistema(db: Session = Depends(get_db)):
+def estadisticas_sistema(db: Session = Depends(get_db)):
     """Dashboard de estadisticas en tiempo real desde MySQL."""
     return crud.obtener_dashboard(db)
 
 
 @app.get("/estadisticas/diaria", tags=["Analytics"], summary="Estadistica del dia")
-async def estadistica_diaria(db: Session = Depends(get_db)):
+def estadistica_diaria(db: Session = Depends(get_db)):
     """Estadisticas pre-calculadas del dia actual."""
-    stats = crud.obtener_o_crear_estadistica_hoy(db)
+    stats = crud.actualizar_estadisticas(db)
     return {
         "fecha": stats.fecha,
         "total_evaluaciones": stats.total_evaluaciones,
@@ -449,7 +468,7 @@ async def estadistica_diaria(db: Session = Depends(get_db)):
 
 
 @app.get("/estadisticas/tendencia", tags=["Analytics"], summary="Tendencia de evaluaciones")
-async def tendencia_evaluaciones(dias: int = Query(7, ge=1, le=30), db: Session = Depends(get_db)):
+def tendencia_evaluaciones(dias: int = Query(7, ge=1, le=30), db: Session = Depends(get_db)):
     """Tendencia de evaluaciones por nivel en los ultimos N dias."""
     from sqlalchemy import func
     from models_db import EstadisticaDiaria
@@ -474,34 +493,35 @@ async def tendencia_evaluaciones(dias: int = Query(7, ge=1, le=30), db: Session 
 
 
 @app.get("/estadisticas/diagnosticos-frecuentes", tags=["Analytics"])
-async def diagnosticos_frecuentes(db: Session = Depends(get_db)):
+def diagnosticos_frecuentes(db: Session = Depends(get_db)):
     """Top 10 diagnosticos mas frecuentes en el sistema."""
     diag = crud.diagnosticos_mas_comunes(db, 10)
     return {"diagnosticos": [{"nombre": d[0], "total": d[1]} for d in diag]}
 
 
 @app.get("/health", summary="Health check", tags=["Monitoreo"])
-async def health_check(db: Session = Depends(get_db)):
+def health_check(db: Session = Depends(get_db)):
     """Verifica que el sistema y la base de datos esten operativos."""
     from sqlalchemy import text
     try:
         db.execute(text("SELECT 1"))
         db_status = "connected"
-    except:
+    except SQLAlchemyError:
+        db.rollback()
         db_status = "disconnected"
 
-    return {
-        "status": "healthy",
+    return JSONResponse(status_code=200 if db_status == "connected" else 503, content={
+        "status": "healthy" if db_status == "connected" else "degraded",
         "service": "sistema-triaje-experto",
         "version": "3.0.0",
         "database": db_status,
         "modulos": ["triage_engine", "fuzzy_engine", "knowledge_base", "clinical_support"],
         "protocolos": ["ESI", "MTS", "CTAS", "ATS"]
-    }
+    })
 
 
 @app.get("/", response_class=HTMLResponse, summary="Interfaz web", tags=["UI"])
-async def root():
+def root():
     html_path = STATIC_DIR / "index.html"
     return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
 

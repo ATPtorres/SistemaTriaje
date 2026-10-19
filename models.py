@@ -7,7 +7,12 @@ Basado en el modelo Emergency Severity Index (ESI) de 5 niveles.
 
 from enum import Enum
 from typing import Literal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StringConstraints
+from typing import Annotated
+
+IdentificadorPaciente = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)
+]
 
 
 # =============================================================================
@@ -139,7 +144,7 @@ class DatosPaciente(BaseModel):
     Modelo completo de entrada para la evaluación de triaje.
     Agrupa demographics, signos vitales, nivel de conciencia y síntomas.
     """
-    id_paciente: str = Field(
+    id_paciente: IdentificadorPaciente = Field(
         ..., 
         description="Identificador único del paciente (historia clínica o temporal)",
         examples=["P-001"]

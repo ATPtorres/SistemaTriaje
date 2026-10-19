@@ -6,7 +6,8 @@ Separacion de concern: entrada (create), salida (response), internos.
 """
 
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from models import IdentificadorPaciente
 
 
 # =============================================================================
@@ -15,7 +16,7 @@ from pydantic import BaseModel, Field
 
 class PacienteCreate(BaseModel):
     """Esquema de entrada para crear un paciente."""
-    id_externo: str = Field(..., max_length=50, description="ID del paciente")
+    id_externo: IdentificadorPaciente = Field(..., description="ID del paciente")
     nombre: str | None = Field(None, max_length=100)
     edad: int = Field(..., ge=0, le=150)
     sexo: str | None = Field(None, max_length=1, pattern="^[MFO]$")
@@ -43,8 +44,7 @@ class PacienteResponse(BaseModel):
     created_at: datetime | None
     updated_at: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -96,8 +96,7 @@ class EvaluacionResponse(BaseModel):
     fecha_evaluacion: datetime | None
     duracion_ms: int | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -116,8 +115,7 @@ class SignosVitalesResponse(BaseModel):
     nivel_conciencia: str
     registrado_en: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -136,8 +134,7 @@ class AlertaResponse(BaseModel):
     nivel_gravedad: int
     generada_en: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -157,8 +154,7 @@ class DiagnosticoResponse(BaseModel):
     conducta: str | None
     sugerido_en: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -195,8 +191,7 @@ class ReglaResponse(BaseModel):
     created_at: datetime | None
     updated_at: datetime | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # =============================================================================
@@ -215,8 +210,7 @@ class EstadisticaDiariaResponse(BaseModel):
     tiempo_promedio_evaluacion_ms: int | None
     diagnostico_mas_comun: str | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DashboardResponse(BaseModel):
