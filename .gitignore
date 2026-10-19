@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.snapshots/
+.pytest_cache/
+node_modules/
+*.log
+*.db
+*.sqlite
+*.sqlite3
+# Proyecto independiente, ajeno al sistema de triaje.
+/control-acceso/

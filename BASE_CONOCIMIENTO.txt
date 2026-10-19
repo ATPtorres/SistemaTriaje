@@ -1,0 +1,334 @@
+================================================================================
+  SISTEMA EXPERTO DE TRIAJE MEDICO
+  Base de Conocimiento y Base de Hechos
+  Version 3.0.0
+================================================================================
+
+
+================================================================================
+  PARTE 1: BASE DE CONOCIMIENTO (REGLAS DE PRODUCCION)
+================================================================================
+
+Formato: IF <condiciones> THEN <conclusion> CF:<confianza>
+
+Estructura de cada regla:
+  - ID: Identificador unico
+  - Nombre: Descripcion corta
+  - Condiciones: Hechos que deben cumplirse (operador logico)
+  - Conclusion: Texto explicativo
+  - Nivel asignado: Nivel ESI (1-5)
+  - Confianza (CF): 0.0 a 1.0
+  - Prioridad: Mayor = se evalua primero
+  - Categoria: critico/emergencia/urgente/menos_urgente/no_urgente
+
+
+--------------------------------------------------------------------------------
+  NIVEL 1 - RESUCITACION (ROJO) - Riesgo vital inmediato
+--------------------------------------------------------------------------------
+
+R001 | Inconsciencia
+  IF conciencia_i == True
+  THEN "Paciente inconsciente - riesgo vital inmediato"
+  CF: 1.00 | Prioridad: 100
+
+R002 | Convulsiones activas
+  IF convulsiones == True
+  THEN "Convulsiones activas - requiere intervencion inmediata"
+  CF: 0.98 | Prioridad: 100
+
+R003 | SpO2 critica
+  IF spo2 < 90
+  THEN "Hipoxemia severa (SpO2 < 90%) - riesgo vital"
+  CF: 0.98 | Prioridad: 99
+
+R004 | FC incompatible con vida
+  IF fc <= 25
+  THEN "Frecuencia cardiaca incompatible con vida"
+  CF: 0.99 | Prioridad: 100
+
+R005 | Shock hipotensivo
+  IF pas < 80 AND conciencia_alerta == False
+  THEN "Shock hipotensivo con compromiso neurologico"
+  CF: 0.97 | Prioridad: 99
+
+R006 | Sangrado + hipotension
+  IF sangrado_activo == True AND pas < 90
+  THEN "Hemorragia activa con inestabilidad hemodinamica"
+  CF: 0.96 | Prioridad: 98
+
+
+--------------------------------------------------------------------------------
+  NIVEL 2 - EMERGENCIA (NARANJA) - Alto riesgo de deterioro
+--------------------------------------------------------------------------------
+
+R010 | Alteracion de conciencia
+  IF conciencia_alerta == False
+  THEN "Alteracion del nivel de conciencia"
+  CF: 0.95 | Prioridad: 90
+
+R011 | Dolor toracico
+  IF dolor_toracico == True
+  THEN "Dolor toracico - descartar etiologia cardiaca"
+  CF: 0.92 | Prioridad: 88
+
+R012 | Dificultad respiratoria severa
+  IF dificultad_respiratoria == True AND spo2 < 94
+  THEN "Insuficiencia respiratoria aguda"
+  CF: 0.94 | Prioridad: 87
+
+R013 | Taquicardia severa
+  IF fc > 150 AND dolor_toracico == False
+  THEN "Taquicardia severa - evaluar causa"
+  CF: 0.88 | Prioridad: 85
+
+R014 | Crisis hipertensiva
+  IF crisis_hipertensiva == True
+  THEN "Crisis hipertensiva - riesgo de ACV"
+  CF: 0.90 | Prioridad: 86
+
+R015 | Pediatrico critico
+  IF edad_menor_2 == True AND fiebre == True
+  THEN "Paciente pediatrico de alto riesgo"
+  CF: 0.85 | Prioridad: 84
+
+
+--------------------------------------------------------------------------------
+  NIVEL 3 - URGENTE (AMARILLO) - Multiples recursos
+--------------------------------------------------------------------------------
+
+R020 | Multiples alteraciones vitales
+  IF num_alteraciones_vitales >= 2
+  THEN "Multiples alteraciones en signos vitales"
+  CF: 0.88 | Prioridad: 70
+
+R021 | Dolor intenso estable
+  IF dolor_intenso == True AND pas >= 90
+  THEN "Dolor intenso con signos vitales estables"
+  CF: 0.82 | Prioridad: 68
+
+R022 | Sangrado estable
+  IF sangrado_activo == True AND pas >= 90
+  THEN "Hemorragia activa compensada"
+  CF: 0.85 | Prioridad: 67
+
+R023 | Fiebre con alteracion conducta
+  IF fiebre == True AND alteracion_conducta == True
+  THEN "Fiebre con compromiso neurologico - descartar meningitis"
+  CF: 0.80 | Prioridad: 66
+
+
+--------------------------------------------------------------------------------
+  NIVEL 4 - MENOS URGENTE (VERDE) - Un recurso
+--------------------------------------------------------------------------------
+
+R030 | Fiebre leve
+  IF fiebre_leve == True
+  THEN "Cuadro febril sin signos de alarma"
+  CF: 0.75 | Prioridad: 50
+
+R031 | Alteracion vital leve
+  IF num_alteraciones_vitales == 1
+  THEN "Alteracion aislada de signos vitales"
+  CF: 0.70 | Prioridad: 48
+
+
+--------------------------------------------------------------------------------
+  NIVEL 5 - NO URGENTE (AZUL) - Sin recursos
+--------------------------------------------------------------------------------
+
+R040 | Paciente estable
+  IF num_alteraciones_vitales == 0 AND tiene_sintomas_alarma == False
+  THEN "Paciente estable sin factores de riesgo"
+  CF: 0.90 | Prioridad: 10
+
+
+================================================================================
+  PARTE 2: BASE DE HECHOS
+================================================================================
+
+Los hechos se derivan automaticamente de los datos crudos del paciente.
+
+--------------------------------------------------------------------------------
+  2.1 HECHOS DIRECTOS (extraidos del input)
+--------------------------------------------------------------------------------
+
+  Hecho                       Tipo        Rango / Valores
+  -------------------------   ----------  --------------------------
+  fc                          entero      20-300 (frecuencia cardiaca lpm)
+  spo2                        entero      0-100 (saturacion oxigeno %)
+  pas                         entero      40-300 (presion arterial sistolica mmHg)
+  pad                         entero      20-200 (presion arterial diastolica mmHg)
+  temp                        float       30.0-45.0 (temperatura C)
+  edad                        entero      0-150 (anos)
+
+--------------------------------------------------------------------------------
+  2.2 HECHOS DE CONCIENCIA (escala AVDI)
+--------------------------------------------------------------------------------
+
+  Hecho                       Tipo        Descripcion
+  -------------------------   ----------  --------------------------
+  conciencia_i                boolean     True si nivel = "Inconsciente"
+  conciencia_alerta           boolean     True si nivel = "Alerta"
+
+  Valores de entrada: "Alerta", "Verbal", "Dolor", "Inconsciente"
+
+--------------------------------------------------------------------------------
+  2.3 HECHOS DE SINTOMAS (directos del paciente)
+--------------------------------------------------------------------------------
+
+  Hecho                       Tipo        Descripcion
+  -------------------------   ----------  --------------------------
+  convulsiones                boolean     Convulsiones activas o recientes
+  dolor_toracico              boolean     Dolor o malestar en el pecho
+  dificultad_respiratoria     boolean     Disnea o dificultad para respirar
+  sangrado_activo             boolean     Hemorragia activa visible
+  alteracion_conducta         boolean     Comportamiento inusual, agitacion
+  trauma_significativo        boolean     Lesion por mecanismo de alto impacto
+  dolor_intenso               boolean     Dolor severo (EVA >= 7)
+
+--------------------------------------------------------------------------------
+  2.4 HECHOS DERIVADOS (calculados a partir de umbrales clinicos)
+--------------------------------------------------------------------------------
+
+  Hecho                       Tipo        Condicion de activacion
+  -------------------------   ----------  --------------------------
+  fiebre                      boolean     temp >= 38.0
+  fiebre_leve                 boolean     38.0 <= temp <= 39.5
+  fiebre_alta                 boolean     temp >= 39.5
+  crisis_hipertensiva         boolean     pas > 200 OR pad > 120
+  edad_menor_2                boolean     edad < 2
+
+--------------------------------------------------------------------------------
+  2.5 HECHOS CALCULADOS (contadores y agregaciones)
+--------------------------------------------------------------------------------
+
+  Hecho                       Tipo        Formula
+  -------------------------   ----------  --------------------------
+  num_alteraciones_vitales    entero      Conteo de alteraciones:
+                                          +1 si fc < 50 OR fc > 120
+                                          +1 si pas < 90 OR pas > 180
+                                          +1 si spo2 < 94
+                                          +1 si temp < 36.0 OR temp > 38.0
+
+  tiene_sintomas_alarma       boolean     True si CUALQUIERA de:
+                                          dolor_toracico, dificultad_respiratoria,
+                                          sangrado_activo, convulsiones,
+                                          alteracion_conducta, trauma_significativo,
+                                          dolor_intenso
+
+
+================================================================================
+  PARTE 3: ARBOL DE DECISION (inferencia en cascada)
+================================================================================
+
+N00: Paciente inconsciente o convulsiones?
+  |
+  |-- SI --> NIVEL 1 - Resucitacion (Rojo)
+  |
+  NO --> N02: SpO2 < 90% o FC <= 25?
+         |
+         |-- SI --> NIVEL 1 - Resucitacion (Rojo)
+         |
+         NO --> N03: PAS < 80 + conciencia alterada?
+                |
+                |-- SI --> NIVEL 1 - Resucitacion (Rojo)
+                |
+                NO --> N04: Dolor toracico o alteracion conciencia?
+                       |
+                       |-- SI --> NIVEL 2 - Emergencia (Naranja)
+                       |
+                       NO --> N05: SpO2 < 94 + dificultad respiratoria?
+                              |
+                              |-- SI --> NIVEL 2 - Emergencia (Naranja)
+                              |
+                              NO --> N06: FC > 150 o crisis hipertensiva?
+                                     |
+                                     |-- SI --> NIVEL 2 - Emergencia (Naranja)
+                                     |
+                                     NO --> N07: 2+ alteraciones vitales?
+                                            |
+                                            |-- SI --> NIVEL 3 - Urgente (Amarillo)
+                                            |
+                                            NO --> N08: Dolor intenso o sangrado estable?
+                                                   |
+                                                   |-- SI --> NIVEL 3 - Urgente (Amarillo)
+                                                   |
+                                                   NO --> N09: 1 alteracion vital leve?
+                                                          |
+                                                          |-- SI --> NIVEL 4 - Menos Urgente (Verde)
+                                                          |
+                                                          NO --> NIVEL 5 - No Urgente (Azul)
+
+
+================================================================================
+  PARTE 4: SISTEMA DE EXPLICACIONES
+================================================================================
+
+El sistema experto genera 3 tipos de explicacion:
+
+1. WHY (Por que se asigno este nivel?)
+   - Lista las reglas que se activaron para el nivel asignado
+   - Muestra la evidencia que soporta cada regla
+   - Indica el factor de confianza de cada regla
+
+2. HOW (Como se llego a esta conclusion?)
+   - Metodo: Forward Chaining (encadenamiento hacia adelante)
+   - Total de reglas evaluadas
+   - Total de reglas activadas
+   - Factor de confianza maximo alcanzado
+
+3. TRACE (Camino completo de inferencia)
+   - Lista secuencial de todas las reglas evaluadas
+   - Para cada regla: si CUMPLE o NO CUMPLE
+   - Nivel propuesto por cada regla activada
+   - Confianza de cada regla
+
+
+================================================================================
+  PARTE 5: PROTOCOLOS INTERNACIONALES
+================================================================================
+
+El sistema clasifica automaticamente en 4 protocolos internacionales:
+
+  Protocolo  Organizacion                      Paises
+  ---------  --------------------------------  ---------------------------
+  ESI v4     ACEP (American College)           Estados Unidos
+  MTS        Manchester Triage Group           Reino Unido / Europa
+  CTAS v5    CAEP (Canadian Association)       Canada
+  ATS        ACEM (Australasian College)       Australia / Nueva Zelanda
+
+Todos usan la misma escala de 5 niveles pero con diferentes:
+  - Tiempos de espera maximos
+  - Criterios de clasificacion
+  - Colores y codigos
+
+
+================================================================================
+  PARTE 6: MOTOR DIFUSO (Mamdani FIS)
+================================================================================
+
+Variables de entrada:
+
+  Variable  Unidad  Rango      Conjuntos difusos
+  --------  ------  ---------  --------------------------------
+  FC        lpm     20-200     MuyBaja, Baja, Normal, Alta, MuyAlta
+  SpO2      %       70-100     Critica, Baja, Normal, Optima
+  PAS       mmHg    40-200     Critica, Baja, Normal, Alta, MuyAlta
+  Temp      C       34-42      Hipotermia, Baja, Normal, Fiebre, FiebreAlta
+  Edad      anos    0-120      Neonato, Infante, Nino, Adulto, Mayor
+
+Variable de salida:
+
+  Variable  Unidad  Rango      Conjuntos difusos
+  --------  ------  ---------  --------------------------------
+  Riesgo    score   0-100      Bajo, Moderado, Alto, Critico
+
+22 reglas difusas IF-THEN que codifican conocimiento clinico experto.
+Defuzzificacion por metodo del centroide.
+
+
+================================================================================
+  FIN DEL DOCUMENTO
+  Sistema Experto de Triaje v3.0.0
+  Archivo: knowledge_base.py
+================================================================================

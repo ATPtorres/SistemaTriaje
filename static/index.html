@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Triaje Medico - ESI</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --border: #e5e7eb;
+            --border-hover: #d1d5db;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --accent: #2563eb;
+            --accent-glow: rgba(37,99,235,0.12);
+            --red: #dc2626;
+            --orange: #ea580c;
+            --yellow: #d97706;
+            --green: #16a34a;
+            --blue: #2563eb;
+            --red-bg: rgba(220,38,38,0.06);
+            --orange-bg: rgba(234,88,12,0.06);
+            --yellow-bg: rgba(217,119,6,0.06);
+            --green-bg: rgba(22,163,74,0.06);
+            --blue-bg: rgba(37,99,235,0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ===================== HEADER ===================== */
+        .top-bar {
+            height: 48px;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1.5rem;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .top-bar-left { display: flex; align-items: center; gap: 1rem; }
+
+        .logo-mark {
+            width: 28px; height: 28px;
+            background: var(--accent);
+            border-radius: 6px;
+            display: grid; place-items: center;
+            font-weight: 800; font-size: 0.75rem; color: #fff;
+        }
+
+        .top-bar-title {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .status-pill {
+            display: flex; align-items: center; gap: 0.375rem;
+            background: rgba(22,163,74,0.08);
+            border: 1px solid rgba(22,163,74,0.25);
+            padding: 0.1875rem 0.625rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: #16a34a;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+            50% { box-shadow: 0 0 0 3px rgba(34,197,94,0); }
+        }
+
+        .top-bar-clock {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .lang-toggle {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            overflow: hidden;
+            margin-right: 0.75rem;
+        }
+
+        .lang-btn {
+            padding: 0.1875rem 0.625rem;
+            font-size: 0.6875rem;
+            font-weight: 600;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-family: inherit;
+            transition: all 0.15s;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .lang-btn:not(.active):hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* ===================== MAIN GRID ===================== */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            height: calc(100vh - 48px);
+        }
+
+        /* ===================== LEFT PANEL ===================== */
+        .left-panel {
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 1rem 1.25rem 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-header h2 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.25rem;
+        }
+
+        .field-group {
+            margin-bottom: 1rem;
+        }
+
+        .field-label {
+            font-size: 0.6875rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: 0.375rem;
+            display: block;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .field-input {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.625rem;
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .field-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .field-input::placeholder { color: var(--text-muted); }
+
+        .field-select {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.625rem;
+            color: var(--text-primary);
+            font-size: 0.8125rem;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.625rem center;
+            transition: all 0.2s;
+        }
+
+        .field-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow);
+        }
+
+        .section-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 1rem 0;
+        }
+
+        .sintomas-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .sintoma-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4375rem 0.625rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .sintoma-check:hover {
+            border-color: var(--border-hover);
+            color: var(--text-primary);
+        }
+
+        .sintoma-check input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 14px; height: 14px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.6875rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            box-shadow: 0 2px 8px var(--accent-glow);
+        }
+
+        .btn-primary:active { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+        .panel-footer {
+            padding: 0.75rem 1.25rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* ===================== RIGHT DASHBOARD ===================== */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dash-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* ===================== VITAL SIGNS ROW ===================== */
+        .vitals-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.75rem;
+        }
+
+        .vital-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.625rem;
+            padding: 0.875rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .vital-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: var(--vital-color, var(--accent));
+            border-radius: 0.625rem 0.625rem 0 0;
+        }
+
+        .vital-card.state-warning { border-color: rgba(234,88,12,0.4); }
+        .vital-card.state-critical {
+            border-color: rgba(220,38,38,0.5);
+            animation: cardCritical 1.5s ease-in-out infinite;
+        }
+
+        @keyframes cardCritical {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.08); }
+            50% { box-shadow: 0 0 8px 0 rgba(220,38,38,0.12); }
+        }
+
+        .vital-icon {
+            width: 32px; height: 32px;
+            border-radius: 0.375rem;
+            display: grid; place-items: center;
+            margin-bottom: 0.625rem;
+            font-size: 0.875rem;
+        }
+
+        .vital-label {
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .vital-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            transition: color 0.3s;
+        }
+
+        .vital-unit {
+            font-size: 0.6875rem;
+            font-weight: 400;
+            color: var(--text-muted);
+            margin-left: 2px;
+        }
+
+        .vital-range {
+            font-size: 0.5625rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        .vital-bar-track {
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+
+        .vital-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+        }
+
+        /* ===================== ECG STRIP ===================== */
+        .ecg-strip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.625rem;
+            overflow: hidden;
+        }
+
+        .ecg-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.625rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .ecg-label-group { display: flex; align-items: center; gap: 0.75rem; }
+
+        .ecg-channel {
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .ecg-live-badge {
+            display: flex; align-items: center; gap: 0.25rem;
+            font-size: 0.5625rem;
+            font-weight: 600;
+            color: #16a34a;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ecg-live-dot {
+            width: 5px; height: 5px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: statusPulse 1.5s ease-in-out infinite;
+        }
+
+        .ecg-rate-display {
+            display: flex; align-items: baseline; gap: 0.375rem;
+        }
+
+        .ecg-rate-num {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #16a34a;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ecg-rate-unit {
+            font-size: 0.625rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .ecg-canvas-area {
+            height: 100px;
+            position: relative;
+            background:
+                linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        #ecgCanvas { width: 100%; height: 100%; display: block; }
+
+        /* ===================== TRIAGE RESULT ===================== */
+        .result-section {
+            display: none;
+        }
+
+        .result-section.visible {
+            display: block;
+            animation: fadeSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-banner {
+            border-radius: 0.625rem;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .result-nivel-big {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            position: relative;
+        }
+
+        .result-color-text {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 0.25rem;
+            position: relative;
+        }
+
+        .result-details {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.625rem;
+            overflow: hidden;
+            margin-top: 0.75rem;
+        }
+
+        .result-row {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-row:last-child { border-bottom: none; }
+
+        .result-row-label {
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-row-value {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .alert-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.375rem;
+            margin-top: 0.25rem;
+        }
+
+        .alert-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            background: var(--red-bg);
+            color: #dc2626;
+            padding: 0.1875rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.6875rem;
+            font-weight: 500;
+            border: 1px solid rgba(220,38,38,0.2);
+        }
+
+        .alert-tag::before {
+            content: '';
+            width: 4px; height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+        }
+
+        .recom-box {
+            background: var(--blue-bg);
+            border: 1px solid rgba(37,99,235,0.15);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .recom-box .result-row-label { color: #2563eb; }
+        .recom-box .result-row-value { color: #1e40af; }
+
+        /* ===================== GAUGE DIAL (SVG) ===================== */
+        .gauge-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem;
+        }
+
+        .gauge-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.625rem;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gauge-svg {
+            width: 100px; height: 60px;
+            overflow: visible;
+        }
+
+        .gauge-track {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 6;
+            stroke-linecap: round;
+        }
+
+        .gauge-fill {
+            fill: none;
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.8s cubic-bezier(0.22, 1, 0.36, 1), stroke 0.3s;
+        }
+
+        .gauge-label {
+            font-size: 0.625rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .gauge-value-text {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-top: 0.125rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ===================== HISTORY ===================== */
+        .history-strip {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.25rem;
+        }
+
+        .history-strip::-webkit-scrollbar { height: 4px; }
+        .history-strip::-webkit-scrollbar-track { background: transparent; }
+        .history-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        .history-chip {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-size: 0.75rem;
+        }
+
+        .history-chip:hover { border-color: var(--border-hover); }
+
+        .history-chip-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .history-chip-id { font-weight: 600; color: var(--text-primary); }
+
+        .history-chip-badge {
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 0.0625rem 0.375rem;
+            border-radius: 9999px;
+        }
+
+        .empty-hist {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        /* ===================== SCROLLBAR ===================== */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+
+        /* ===================== RESPONSIVE ===================== */
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .left-panel { max-height: 45vh; border-right: none; border-bottom: 1px solid var(--border); }
+            .vitals-row { grid-template-columns: repeat(3, 1fr); }
+            .gauge-row { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            .vitals-row { grid-template-columns: 1fr 1fr; }
+            .gauge-row { grid-template-columns: 1fr 1fr; }
+            .field-row { grid-template-columns: 1fr; }
+            .top-bar { padding: 0 1rem; }
+            .top-bar-clock { display: none; }
+        }
+
+        @media (max-width: 400px) {
+            .vitals-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===================== TOP BAR ===================== -->
+<div class="top-bar">
+    <div class="top-bar-left">
+        <div class="logo-mark">T</div>
+        <span class="top-bar-title" data-i18n="app_title">Sistema de Triaje - ESI</span>
+        <div class="status-pill"><div class="status-dot"></div><span data-i18n="online">Online</span></div>
+    </div>
+    <div style="display:flex;align-items:center">
+        <div class="lang-toggle" id="langToggle">
+            <button type="button" class="lang-btn active" data-lang="es" onclick="setLang('es')">ES</button>
+            <button type="button" class="lang-btn" data-lang="qu" onclick="setLang('qu')">QU</button>
+        </div>
+        <div class="top-bar-clock" id="clock"></div>
+    </div>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<div class="main-grid">
+
+    <!-- LEFT: FORM -->
+    <div class="left-panel">
+        <div class="panel-header"><h2 data-i18n="panel_title">Evaluacion de Paciente</h2></div>
+        <div class="panel-body">
+            <form id="triageForm" onsubmit="evaluar(event)">
+                <div class="field-group">
+                    <label class="field-label" data-i18n="identificacion">Identificacion</label>
+                    <div class="field-row">
+                        <input class="field-input" type="text" id="idPaciente" data-i18n-ph="ph_id" placeholder="ID Paciente" required>
+                        <input class="field-input" type="number" id="edad" min="0" max="150" data-i18n-ph="ph_edad" placeholder="Edad" required>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="field-group">
+                    <label class="field-label" data-i18n="signos_vitales">Signos Vitales</label>
+                    <div class="field-row">
+                        <input class="field-input" type="number" id="fc" min="20" max="300" data-i18n-ph="ph_fc" placeholder="FC (lpm)" required oninput="sync()">
+                        <input class="field-input" type="number" id="spo2" min="0" max="100" data-i18n-ph="ph_spo2" placeholder="SpO2 (%)" required oninput="sync()">
+                    </div>
+                    <div class="field-row">
+                        <input class="field-input" type="number" id="pas" min="40" max="300" data-i18n-ph="ph_pas" placeholder="PAS (mmHg)" required oninput="sync()">
+                        <input class="field-input" type="number" id="pad" min="20" max="200" data-i18n-ph="ph_pad" placeholder="PAD (mmHg)" required oninput="sync()">
+                    </div>
+                    <div class="field-row">
+                        <input class="field-input" type="number" id="temp" min="30" max="45" step="0.1" data-i18n-ph="ph_temp" placeholder="Temp (C)" required oninput="sync()">
+                        <select class="field-select" id="conciencia" required>
+                            <option value="Alerta" data-i18n="opt_alerta">A - Alerta</option>
+                            <option value="Verbal" data-i18n="opt_verbal">V - Verbal</option>
+                            <option value="Dolor" data-i18n="opt_dolor">D - Dolor</option>
+                            <option value="Inconsciente" data-i18n="opt_inconsciente">I - Inconsciente</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="section-divider"></div>
+
+                <div class="field-group">
+                    <label class="field-label" data-i18n="sintomas">Sintomas</label>
+                    <div class="sintomas-list">
+                        <label class="sintoma-check"><input type="checkbox" id="sx1"> <span data-i18n="sx1">Dolor toracico</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx2"> <span data-i18n="sx2">Dificultad respiratoria</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx3"> <span data-i18n="sx3">Sangrado activo</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx4"> <span data-i18n="sx4">Convulsiones</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx5"> <span data-i18n="sx5">Alteracion de conducta</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx6"> <span data-i18n="sx6">Trauma significativo</span></label>
+                        <label class="sintoma-check"><input type="checkbox" id="sx7"> <span data-i18n="sx7">Dolor intenso (EVA>=7)</span></label>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer">
+            <button class="btn-primary" id="btnEval" onclick="evaluar(event)" data-i18n="btn_eval">Evaluar Triaje</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: DASHBOARD -->
+    <div class="right-panel">
+        <div class="dash-content">
+
+            <!-- Vital Signs Cards -->
+            <div class="vitals-row">
+                <div class="vital-card" id="vc-fc" style="--vital-color: #ef4444">
+                    <div class="vital-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    </div>
+                    <div class="vital-label" data-i18n="v_fc">Frec. Cardiaca</div>
+                    <div class="vital-value" id="v-fc" style="color:#ef4444">--<span class="vital-unit">lpm</span></div>
+                    <div class="vital-range">60 - 100 lpm</div>
+                    <div class="vital-bar-track"><div class="vital-bar-fill" id="b-fc" style="width:0;background:#ef4444"></div></div>
+                </div>
+                <div class="vital-card" id="vc-spo2" style="--vital-color: #3b82f6">
+                    <div class="vital-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                    <div class="vital-label" data-i18n="v_spo2">Saturacion O2</div>
+                    <div class="vital-value" id="v-spo2" style="color:#3b82f6">--<span class="vital-unit">%</span></div>
+                    <div class="vital-range">95 - 100 %</div>
+                    <div class="vital-bar-track"><div class="vital-bar-fill" id="b-spo2" style="width:0;background:#3b82f6"></div></div>
+                </div>
+                <div class="vital-card" id="vc-pas" style="--vital-color: #8b5cf6">
+                    <div class="vital-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17h2v-7H3v7zm4 0h2V7H7v10zm4 0h2V4h-2v13zm4 0h2v-9h-2v9zm4 0h2V2h-2v15z"/></svg>
+                    </div>
+                    <div class="vital-label" data-i18n="v_pas">Presion Arterial</div>
+                    <div class="vital-value" id="v-pas" style="color:#8b5cf6">--/<span class="vital-unit">mmHg</span></div>
+                    <div class="vital-range">90-140 / 60-90</div>
+                    <div class="vital-bar-track"><div class="vital-bar-fill" id="b-pas" style="width:0;background:#8b5cf6"></div></div>
+                </div>
+                <div class="vital-card" id="vc-temp" style="--vital-color: #f59e0b">
+                    <div class="vital-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-8c0-.55.45-1 1-1s1 .45 1 1h-1v1h1v2h-1v1h1v2h-2V5z"/></svg>
+                    </div>
+                    <div class="vital-label" data-i18n="v_temp">Temperatura</div>
+                    <div class="vital-value" id="v-temp" style="color:#f59e0b">--<span class="vital-unit">C</span></div>
+                    <div class="vital-range">36.1 - 37.2 C</div>
+                    <div class="vital-bar-track"><div class="vital-bar-fill" id="b-temp" style="width:0;background:#f59e0b"></div></div>
+                </div>
+                <div class="vital-card" id="vc-conc" style="--vital-color: #06b6d4">
+                    <div class="vital-icon" style="background:rgba(6,182,212,0.1);color:#06b6d4">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                    </div>
+                    <div class="vital-label" data-i18n="v_conc">Conciencia</div>
+                    <div class="vital-value" id="v-conc" style="color:#06b6d4;font-size:1rem;font-weight:600">A</div>
+                    <div class="vital-range">AVDI</div>
+                    <div class="vital-bar-track"><div class="vital-bar-fill" id="b-conc" style="width:100%;background:#06b6d4"></div></div>
+                </div>
+            </div>
+
+            <!-- ECG Strip -->
+            <div class="ecg-strip">
+                <div class="ecg-header">
+                    <div class="ecg-label-group">
+                        <span class="ecg-channel">ECG Lead II</span>
+                        <div class="ecg-live-badge"><div class="ecg-live-dot"></div><span data-i18n="live">Live</span></div>
+                    </div>
+                    <div class="ecg-rate-display">
+                        <span class="ecg-rate-num" id="ecgRate">72</span>
+                        <span class="ecg-rate-unit">BPM</span>
+                    </div>
+                </div>
+                <div class="ecg-canvas-area">
+                    <canvas id="ecgCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Gauge Dials -->
+            <div class="gauge-row">
+                <div class="gauge-card">
+                    <svg class="gauge-svg" viewBox="0 0 100 60">
+                        <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
+                        <path class="gauge-fill" id="g-fc" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#ef4444" stroke-dasharray="126" stroke-dashoffset="126" />
+                        <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-fc-val">--</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">lpm</text>
+                    </svg>
+                    <div class="gauge-label">FC</div>
+                </div>
+                <div class="gauge-card">
+                    <svg class="gauge-svg" viewBox="0 0 100 60">
+                        <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
+                        <path class="gauge-fill" id="g-spo2" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#3b82f6" stroke-dasharray="126" stroke-dashoffset="126" />
+                        <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-spo2-val">--</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">%</text>
+                    </svg>
+                    <div class="gauge-label">SpO2</div>
+                </div>
+                <div class="gauge-card">
+                    <svg class="gauge-svg" viewBox="0 0 100 60">
+                        <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
+                        <path class="gauge-fill" id="g-pas" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#8b5cf6" stroke-dasharray="126" stroke-dashoffset="126" />
+                        <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-pas-val">--</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">mmHg</text>
+                    </svg>
+                    <div class="gauge-label">PAS</div>
+                </div>
+                <div class="gauge-card">
+                    <svg class="gauge-svg" viewBox="0 0 100 60">
+                        <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
+                        <path class="gauge-fill" id="g-temp" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#f59e0b" stroke-dasharray="126" stroke-dashoffset="126" />
+                        <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-temp-val">--</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">C</text>
+                    </svg>
+                    <div class="gauge-label">Temp</div>
+                </div>
+            </div>
+
+            <!-- Result -->
+            <div class="result-section" id="resultSection">
+                <div class="result-banner" id="resBanner">
+                    <div class="result-nivel-big" id="resNivel" data-i18n="nivel">Nivel --</div>
+                    <div class="result-color-text" id="resColor">--</div>
+                </div>
+                <div class="result-details">
+                    <div class="result-row">
+                        <div class="result-row-label" data-i18n="motivo">Motivo Clinico</div>
+                        <div class="result-row-value" id="resMotivo">--</div>
+                    </div>
+                    <div class="result-row" id="resAlertasRow" style="display:none">
+                        <div class="result-row-label" data-i18n="alarmas">Signos de Alarma</div>
+                        <div class="alert-tags" id="resAlertas"></div>
+                    </div>
+                    <div class="result-row">
+                        <div class="recom-box">
+                            <div class="result-row-label" data-i18n="recom">Recomendacion</div>
+                            <div class="result-row-value" id="resRecom">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History -->
+            <div>
+                <div class="field-label" style="margin-bottom:0.5rem" data-i18n="historial">Historial de Evaluaciones</div>
+                <div class="history-strip" id="historyStrip">
+                    <div class="empty-hist" data-i18n="sin_evals">Sin evaluaciones registradas</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// ===================== I18N (ES / QU) =====================
+let LANG = localStorage.getItem('triaje_lang') || 'es';
+
+const I18N = {
+  es: {
+    app_title: 'Sistema de Triaje - ESI',
+    online: 'Online',
+    panel_title: 'Evaluacion de Paciente',
+    identificacion: 'Identificacion',
+    ph_id: 'ID Paciente',
+    ph_edad: 'Edad',
+    signos_vitales: 'Signos Vitales',
+    ph_fc: 'FC (lpm)',
+    ph_spo2: 'SpO2 (%)',
+    ph_pas: 'PAS (mmHg)',
+    ph_pad: 'PAD (mmHg)',
+    ph_temp: 'Temp (C)',
+    opt_alerta: 'A - Alerta',
+    opt_verbal: 'V - Verbal',
+    opt_dolor: 'D - Dolor',
+    opt_inconsciente: 'I - Inconsciente',
+    sintomas: 'Sintomas',
+    sx1: 'Dolor toracico',
+    sx2: 'Dificultad respiratoria',
+    sx3: 'Sangrado activo',
+    sx4: 'Convulsiones',
+    sx5: 'Alteracion de conducta',
+    sx6: 'Trauma significativo',
+    sx7: 'Dolor intenso (EVA>=7)',
+    btn_eval: 'Evaluar Triaje',
+    btn_proc: 'Procesando...',
+    v_fc: 'Frec. Cardiaca',
+    v_spo2: 'Saturacion O2',
+    v_pas: 'Presion Arterial',
+    v_temp: 'Temperatura',
+    v_conc: 'Conciencia',
+    live: 'Live',
+    motivo: 'Motivo Clinico',
+    alarmas: 'Signos de Alarma',
+    recom: 'Recomendacion',
+    historial: 'Historial de Evaluaciones',
+    sin_evals: 'Sin evaluaciones registradas',
+    nivel: 'Nivel',
+    rojo: 'Rojo',
+    naranja: 'Naranja',
+    amarillo: 'Amarillo',
+    verde: 'Verde',
+    azul: 'Azul',
+  },
+  qu: {
+    app_title: 'Triaje Systema - ESI',
+    online: 'Sami',
+    panel_title: "Ukuymanta Rikch'ay",
+    identificacion: 'Sutiyachay',
+    ph_id: 'Ukuq ID',
+    ph_edad: 'Pacha',
+    signos_vitales: "Sami Rikch'aykuna",
+    ph_fc: 'Yuyaynin (lpm)',
+    ph_spo2: "Sayk'a (%)",
+    ph_pas: 'PAS (mmHg)',
+    ph_pad: 'PAD (mmHg)',
+    ph_temp: "Q'uñiy (C)",
+    opt_alerta: 'A - Atiq',
+    opt_verbal: 'V - Rimasqoq',
+    opt_dolor: 'D - Nanmiq',
+    opt_inconsciente: 'I - Mana Yuyarqoq',
+    sintomas: 'Yarqaykuna',
+    sx1: "K'uchi nan",
+    sx2: 'Samanay tiksyay',
+    sx3: 'Wachuy awaq',
+    sx4: "Q'uñiy (chullpi)",
+    sx5: 'Yuyay tiksyay',
+    sx6: 'Hatun machuwanakuy',
+    sx7: 'Hatun nan (EVA>=7)',
+    btn_eval: "Triaje Rikch'ay",
+    btn_proc: 'Kallarikun...',
+    v_fc: 'Yuyaynin',
+    v_spo2: "Sayk'a (O2)",
+    v_pas: 'Wachu Sami',
+    v_temp: "Q'uñiy",
+    v_conc: 'Yuyay',
+    live: 'Awaq',
+    motivo: 'Yarqaynin Rimanakuy',
+    alarmas: "Yupaq Rikch'aykuna",
+    recom: 'Yupachiy',
+    historial: "Rikch'aykuna Ñawpaq",
+    sin_evals: "Mana Rikch'ay tiyaq",
+    nivel: 'Chimpa',
+    rojo: 'Puka',
+    naranja: "Q'illi",
+    amarillo: "Q'illu",
+    verde: "Q'umis",
+    azul: 'Anqas',
+  }
+};
+
+const COLOR_QU = { Rojo:'Puka', Naranja:"Q'illi", Amarillo:"Q'illu", Verde:"Q'umis", Azul:'Anqas' };
+
+function t(key) { return (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key; }
+
+function setLang(lang) {
+  LANG = (lang === 'qu') ? 'qu' : 'es';
+  localStorage.setItem('triaje_lang', LANG);
+  document.documentElement.lang = LANG === 'qu' ? 'qu' : 'es';
+  applyI18n();
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.lang === LANG);
+  });
+}
+
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (k === 'nivel') {
+      // Preserve current level number if shown
+      const cur = el.textContent.match(/\d+/);
+      el.textContent = t('nivel') + (cur ? ' ' + cur[0] : ' --');
+    } else {
+      el.textContent = t(k);
+    }
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-ph'));
+  });
+  // Re-translate last result if present
+  if (lastResult) showResult(lastResult, true);
+}
+
+// Init language on load
+if (LANG === 'qu') setLang('qu');
+
+// ===================== CLOCK =====================
+function tickClock() {
+    const d = new Date();
+    document.getElementById('clock').textContent =
+        d.toLocaleDateString('es-CL', { weekday:'long', year:'numeric', month:'long', day:'numeric' }) + '  ' +
+        d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ===================== GAUGE ANIMATION =====================
+const GAUGE_LEN = 126;
+
+function setGauge(id, value, max, color) {
+    const pct = Math.min(value / max, 1);
+    const offset = GAUGE_LEN - (GAUGE_LEN * pct);
+    const el = document.getElementById(id);
+    el.style.strokeDashoffset = offset;
+
+    let c = color;
+    if (color === 'fc') c = value < 50 || value > 120 ? '#ef4444' : value < 60 || value > 100 ? '#f97316' : '#22c55e';
+    if (color === 'spo2') c = value < 90 ? '#ef4444' : value < 95 ? '#f97316' : '#3b82f6';
+    if (color === 'pas') c = value < 90 || value > 180 ? '#ef4444' : value < 100 || value > 140 ? '#f97316' : '#8b5cf6';
+    if (color === 'temp') c = value < 35 || value > 39.5 ? '#ef4444' : value < 36.1 || value > 38 ? '#f97316' : '#f59e0b';
+    el.style.stroke = c;
+}
+
+// ===================== VITAL CARDS SYNC =====================
+function getCardState(type, val) {
+    if (type === 'fc') return val < 40 || val > 150 ? 'critical' : val < 60 || val > 100 ? 'warning' : '';
+    if (type === 'spo2') return val < 90 ? 'critical' : val < 95 ? 'warning' : '';
+    if (type === 'pas') return val < 80 || val > 200 ? 'critical' : val < 90 || val > 140 ? 'warning' : '';
+    if (type === 'temp') return val < 35 || val > 39.5 ? 'critical' : val < 36.1 || val > 38 ? 'warning' : '';
+    return '';
+}
+
+function animateValue(el, target, isFloat) {
+    const current = parseFloat(el.textContent) || 0;
+    const diff = target - current;
+    if (Math.abs(diff) < 0.01) return;
+    let step = 0;
+    const steps = 18;
+    const id = setInterval(() => {
+        step++;
+        const t = step / steps;
+        const ease = 1 - Math.pow(1 - t, 3);
+        const v = current + diff * ease;
+        el.innerHTML = (isFloat ? v.toFixed(1) : Math.round(v)) + el.querySelector('.vital-unit').outerHTML;
+        if (step >= steps) clearInterval(id);
+    }, 16);
+}
+
+function sync() {
+    const fc = parseInt(document.getElementById('fc').value) || 0;
+    const spo2 = parseInt(document.getElementById('spo2').value) || 0;
+    const pas = parseInt(document.getElementById('pas').value) || 0;
+    const pad = parseInt(document.getElementById('pad').value) || 0;
+    const temp = parseFloat(document.getElementById('temp').value) || 0;
+    const conc = document.getElementById('conciencia').value;
+
+    if (fc > 0) {
+        animateValue(document.getElementById('v-fc'), fc, false);
+        document.getElementById('ecgRate').textContent = fc;
+        const s = getCardState('fc', fc);
+        document.getElementById('vc-fc').className = 'vital-card' + (s ? ' ' + s : '');
+        document.getElementById('b-fc').style.width = Math.min(fc / 200 * 100, 100) + '%';
+        setGauge('g-fc', fc, 200, 'fc');
+        document.getElementById('g-fc-val').textContent = fc;
+        ecgBPM = fc;
+    }
+    if (spo2 > 0) {
+        animateValue(document.getElementById('v-spo2'), spo2, false);
+        const s = getCardState('spo2', spo2);
+        document.getElementById('vc-spo2').className = 'vital-card' + (s ? ' ' + s : '');
+        document.getElementById('b-spo2').style.width = spo2 + '%';
+        setGauge('g-spo2', spo2, 100, 'spo2');
+        document.getElementById('g-spo2-val').textContent = spo2;
+    }
+    if (pas > 0) {
+        document.getElementById('v-pas').innerHTML = pas + '/' + (pad || '--') + '<span class="vital-unit">mmHg</span>';
+        const s = getCardState('pas', pas);
+        document.getElementById('vc-pas').className = 'vital-card' + (s ? ' ' + s : '');
+        document.getElementById('b-pas').style.width = Math.min(pas / 200 * 100, 100) + '%';
+        setGauge('g-pas', pas, 200, 'pas');
+        document.getElementById('g-pas-val').textContent = pas + '/' + (pad || '--');
+    }
+    if (temp > 0) {
+        animateValue(document.getElementById('v-temp'), temp, true);
+        const s = getCardState('temp', temp);
+        document.getElementById('vc-temp').className = 'vital-card' + (s ? ' ' + s : '');
+        document.getElementById('b-temp').style.width = Math.min((temp - 30) / 15 * 100, 100) + '%';
+        setGauge('g-temp', temp, 45, 'temp');
+        document.getElementById('g-temp-val').textContent = temp.toFixed(1);
+    }
+
+    const concMap = { 'Alerta': 100, 'Verbal': 66, 'Dolor': 33, 'Inconsciente': 5 };
+    const concLabel = { 'Alerta': 'A', 'Verbal': 'V', 'Dolor': 'D', 'Inconsciente': 'I' };
+    document.getElementById('v-conc').textContent = concLabel[conc];
+    document.getElementById('b-conc').style.width = concMap[conc] + '%';
+}
+
+// ===================== ECG WAVEFORM =====================
+const cvs = document.getElementById('ecgCanvas');
+const c = cvs.getContext('2d');
+let ecgBuf = [];
+let ecgBPM = 72;
+let ecgPhase = 0;
+
+function resizeCVS() {
+    cvs.width = cvs.parentElement.clientWidth;
+    cvs.height = cvs.parentElement.clientHeight;
+}
+resizeCVS();
+window.addEventListener('resize', resizeCVS);
+
+function ecgSample(phase) {
+    const p = phase % 1;
+    if (p < 0.04) return Math.sin(p / 0.04 * Math.PI) * 0.08;
+    if (p < 0.08) return 0;
+    if (p < 0.1) return -0.12;
+    if (p < 0.14) return Math.sin((p - 0.1) / 0.04 * Math.PI) * 0.95;
+    if (p < 0.17) return -0.18;
+    if (p < 0.2) return 0;
+    if (p < 0.32) return Math.sin((p - 0.2) / 0.12 * Math.PI) * 0.18;
+    return 0;
+}
+
+function drawECG() {
+    const w = cvs.width, h = cvs.height, mid = h / 2;
+    c.fillStyle = 'rgba(255,255,255,0.12)';
+    c.fillRect(0, 0, w, h);
+
+    ecgPhase += 0.016 * (ecgBPM / 72);
+    ecgBuf.push(ecgSample(ecgPhase));
+    const maxPts = Math.floor(w / 2.5);
+    if (ecgBuf.length > maxPts) ecgBuf.shift();
+
+    c.beginPath();
+    c.strokeStyle = '#16a34a';
+    c.lineWidth = 1.8;
+    for (let i = 0; i < ecgBuf.length; i++) {
+        const x = (i / maxPts) * w;
+        const y = mid - ecgBuf[i] * mid * 0.85;
+        i === 0 ? c.moveTo(x, y) : c.lineTo(x, y);
+    }
+    c.stroke();
+
+    if (ecgBuf.length) {
+        const lx = ((ecgBuf.length - 1) / maxPts) * w;
+        const ly = mid - ecgBuf[ecgBuf.length - 1] * mid * 0.85;
+        c.beginPath();
+        c.fillStyle = '#16a34a';
+        c.arc(lx, ly, 2.5, 0, Math.PI * 2);
+        c.fill();
+    }
+
+    requestAnimationFrame(drawECG);
+}
+drawECG();
+
+// ===================== API =====================
+let history = [];
+let lastResult = null;
+
+async function evaluar(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnEval');
+    btn.disabled = true;
+    btn.textContent = t('btn_proc');
+
+    const body = {
+        id_paciente: document.getElementById('idPaciente').value,
+        edad: parseInt(document.getElementById('edad').value),
+        idioma: LANG,
+        signos_vitales: {
+            frecuencia_cardiaca: parseInt(document.getElementById('fc').value),
+            presion_sistolica: parseInt(document.getElementById('pas').value),
+            presion_diastolica: parseInt(document.getElementById('pad').value),
+            temperatura: parseFloat(document.getElementById('temp').value),
+            saturacion_oxigeno: parseInt(document.getElementById('spo2').value)
+        },
+        nivel_conciencia: document.getElementById('conciencia').value,
+        sintomas: {
+            dolor_toracico: document.getElementById('sx1').checked,
+            dificultad_respiratoria: document.getElementById('sx2').checked,
+            sangrado_activo: document.getElementById('sx3').checked,
+            convulsiones: document.getElementById('sx4').checked,
+            alteracion_conducta: document.getElementById('sx5').checked,
+            trauma_significativo: document.getElementById('sx6').checked,
+            dolor_intenso: document.getElementById('sx7').checked
+        }
+    };
+
+    try {
+        const r = await fetch('/triaje', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        if (!r.ok) { const e = await r.json(); alert('Error: ' + JSON.stringify(e.detail)); return; }
+        const d = await r.json();
+        lastResult = d;
+        showResult(d);
+        pushHistory(d);
+    } catch(err) { alert('Error: ' + err.message); }
+    finally { btn.disabled = false; btn.textContent = t('btn_eval'); }
+}
+
+const bgMap = { 1:'#fef2f2', 2:'#fff7ed', 3:'#fefce8', 4:'#f0fdf4', 5:'#eff6ff' };
+const txMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#2563eb' };
+const dotMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#3b82f6' };
+
+function showResult(d, silent) {
+    const sec = document.getElementById('resultSection');
+    document.getElementById('resBanner').style.background = bgMap[d.nivel_prioridad];
+    document.getElementById('resNivel').textContent = t('nivel') + ' ' + d.nivel_prioridad;
+    document.getElementById('resNivel').style.color = txMap[d.nivel_prioridad];
+    // Color: backend already translates when idioma=qu; fallback to local dict
+    let colorTxt = d.color;
+    if (LANG === 'qu' && COLOR_QU[d.color]) colorTxt = COLOR_QU[d.color];
+    document.getElementById('resColor').textContent = colorTxt;
+    document.getElementById('resColor').style.color = txMap[d.nivel_prioridad];
+    document.getElementById('resMotivo').textContent = d.motivo_clinico;
+    document.getElementById('resRecom').textContent = d.recomendacion;
+
+    const ar = document.getElementById('resAlertasRow');
+    const al = document.getElementById('resAlertas');
+    if (d.signos_alerta && d.signos_alerta.length) {
+        ar.style.display = 'block';
+        al.innerHTML = d.signos_alerta.map(a => '<span class="alert-tag">' + a + '</span>').join('');
+    } else ar.style.display = 'none';
+
+    if (!silent) sec.classList.add('visible');
+}
+
+function pushHistory(d) {
+    history.unshift(d);
+    if (history.length > 30) history.pop();
+    renderHistory();
+}
+
+function renderHistory() {
+    const el = document.getElementById('historyStrip');
+    if (!history.length) { el.innerHTML = '<div class="empty-hist">' + t('sin_evals') + '</div>'; return; }
+    const t = new Date().toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+    el.innerHTML = history.map((h, i) =>
+        '<div class="history-chip" onclick="showResult(history[' + i + '])">' +
+            '<div class="history-chip-dot" style="background:' + dotMap[h.nivel_prioridad] + '"></div>' +
+            '<span class="history-chip-id">' + h.id_paciente + '</span>' +
+            '<span class="history-chip-badge" style="color:' + txMap[h.nivel_prioridad] + ';background:' + dotMap[h.nivel_prioridad] + '18">N' + h.nivel_prioridad + '</span>' +
+        '</div>'
+    ).join('');
+}
+</script>
+</body>
+</html>
