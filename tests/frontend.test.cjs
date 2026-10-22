@@ -53,13 +53,16 @@ test('a saved Quechua language initializes the full script and allows evaluation
   const canvasContext = Object.fromEntries(['fillRect', 'beginPath', 'moveTo',
     'lineTo', 'stroke', 'arc', 'fill'].map(name => [name, () => {}]));
   const stored = new Map([['triaje_lang', 'qu']]);
+  const values = { idPaciente: 'P-1', edad: '30', fc: '80', spo2: '98',
+    pas: '120', pad: '80', temp: '36.5', conciencia: 'Alerta' };
   const scope = vm.createContext({
     localStorage: { getItem: key => stored.get(key), setItem: (key, value) => stored.set(key, value) },
     document: { documentElement: {},
       querySelectorAll: selector => selector === '[data-i18n]' ? [title] :
         selector === '.lang-btn' ? buttons : [],
       getElementById(id) {
-        if (!nodes.has(id)) nodes.set(id, { value: '75', style: {}, textContent: '',
+        if (!nodes.has(id)) nodes.set(id, { value: values[id] ?? '75', style: {}, textContent: '',
+          classList: { add() {}, remove() {}, toggle() {} }, focus() {},
           parentElement: { clientWidth: 320, clientHeight: 100 }, getContext: () => canvasContext });
         return nodes.get(id);
       } },
@@ -76,4 +79,35 @@ test('a saved Quechua language initializes the full script and allows evaluation
   await vm.runInContext('evaluar({ preventDefault() {} })', scope);
   assert.equal(nodes.get('btnEval').disabled, false);
   assert.equal(nodes.get('btnEval').textContent, vm.runInContext('I18N.qu.btn_eval', scope));
+});
+
+test('empty identifier or age blocks the request with a friendly message', async () => {
+  const nodes = new Map();
+  const canvasContext = Object.fromEntries(['fillRect', 'beginPath', 'moveTo',
+    'lineTo', 'stroke', 'arc', 'fill'].map(name => [name, () => {}]));
+  const values = { idPaciente: '', edad: '', fc: '80', spo2: '98',
+    pas: '120', pad: '80', temp: '36.5', conciencia: 'Alerta' };
+  const alerts = [];
+  let fetchCalls = 0;
+  const scope = vm.createContext({
+    localStorage: { getItem: () => 'es', setItem() {} },
+    document: { documentElement: {},
+      querySelectorAll: () => [],
+      getElementById(id) {
+        if (!nodes.has(id)) nodes.set(id, { value: values[id] ?? '75', style: {}, textContent: '',
+          classList: { add() {}, remove() {}, toggle() {} }, focus() {},
+          parentElement: { clientWidth: 320, clientHeight: 100 }, getContext: () => canvasContext });
+        return nodes.get(id);
+      } },
+    window: { addEventListener() {} }, setInterval() {}, requestAnimationFrame() {},
+    fetch: async () => { fetchCalls++; return { ok: false, json: async () => ({ detail: [] }) }; },
+    alert: message => alerts.push(message),
+  });
+  assert.doesNotThrow(() => vm.runInContext(script, scope));
+  await vm.runInContext('evaluar({ preventDefault() {} })', scope);
+  assert.equal(fetchCalls, 0);
+  assert.equal(alerts.length, 1);
+  assert.match(alerts[0], /incompletos/);
+  assert.match(alerts[0], /ID Paciente/);
+  assert.match(alerts[0], /Edad/);
 });

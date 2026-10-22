@@ -205,6 +205,13 @@
 
         .field-input::placeholder { color: var(--text-muted); }
 
+        .field-input.invalid,
+        .field-select.invalid {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 2px rgba(220,38,38,0.12);
+            background: #fff5f5;
+        }
+
         .field-select {
             width: 100%;
             background: var(--bg-input);
@@ -985,6 +992,20 @@ const I18N = {
     amarillo: 'Amarillo',
     verde: 'Verde',
     azul: 'Azul',
+    f_id: 'ID Paciente',
+    f_edad: 'Edad',
+    f_fc: 'Frecuencia cardiaca',
+    f_spo2: 'Saturacion O2',
+    f_pas: 'Presion sistolica',
+    f_pad: 'Presion diastolica',
+    f_temp: 'Temperatura',
+    err_title: 'Datos incompletos o invalidos',
+    err_id_required: 'Ingrese el ID del paciente.',
+    err_required: 'Complete el campo: {f}.',
+    err_number: '{f} debe ser un numero valido.',
+    err_range: '{f} debe estar entre {min} y {max}.',
+    err_sep: '\n',
+    err_net: 'No se pudo conectar con el servidor: {m}',
   },
   qu: {
     app_title: 'Triaje Systema - ESI',
@@ -1030,6 +1051,20 @@ const I18N = {
     amarillo: "Q'illu",
     verde: "Q'umis",
     azul: 'Anqas',
+    f_id: 'Ukuq ID',
+    f_edad: 'Pacha',
+    f_fc: 'Yuyaynin',
+    f_spo2: "Sayk'a",
+    f_pas: 'Wachu Sami',
+    f_pad: 'Wachu Sami (diastolica)',
+    f_temp: "Q'uñiy",
+    err_title: 'Mana huntachu manapas allinchu',
+    err_id_required: 'Ukuq ID churay.',
+    err_required: 'Huntachiy: {f}.',
+    err_number: '{f} yupay kachun.',
+    err_range: '{f} {min} y {max} ukhupi kachun.',
+    err_sep: '\n',
+    err_net: 'Mana servidorwan tupayta atinchu: {m}',
   }
 };
 
@@ -1229,22 +1264,103 @@ drawECG();
 let history = [];
 let lastResult = null;
 
+// Reglas alineadas con la validacion del backend (models.py)
+const VALIDATION_RULES = [
+  { id: 'idPaciente', key: 'f_id',   type: 'text',  min: 1,   max: 50 },
+  { id: 'edad',       key: 'f_edad', type: 'int',   min: 0,   max: 150 },
+  { id: 'fc',         key: 'f_fc',   type: 'int',   min: 20,  max: 300 },
+  { id: 'spo2',       key: 'f_spo2', type: 'int',   min: 0,   max: 100 },
+  { id: 'pas',        key: 'f_pas',  type: 'int',   min: 40,  max: 300 },
+  { id: 'pad',        key: 'f_pad',  type: 'int',   min: 20,  max: 200 },
+  { id: 'temp',       key: 'f_temp', type: 'float', min: 30,  max: 45 },
+];
+
+function clearFieldErrors() {
+  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+}
+
+function validateForm() {
+  clearFieldErrors();
+  const errors = [];
+  let firstInvalid = null;
+
+  for (const rule of VALIDATION_RULES) {
+    const el = document.getElementById(rule.id);
+    const raw = (el.value || '').trim();
+    let invalid = false;
+
+    if (raw === '') {
+      errors.push(t('err_required').replace('{f}', t(rule.key)));
+      invalid = true;
+    } else if (rule.type === 'text') {
+      if (raw.length < rule.min || raw.length > rule.max) {
+        errors.push(t('err_range')
+          .replace('{f}', t(rule.key))
+          .replace('{min}', rule.min)
+          .replace('{max}', rule.max));
+        invalid = true;
+      }
+    } else {
+      const val = Number(raw.replace(',', '.'));
+      if (!Number.isFinite(val)) {
+        errors.push(t('err_number').replace('{f}', t(rule.key)));
+        invalid = true;
+      } else if (val < rule.min || val > rule.max) {
+        errors.push(t('err_range')
+          .replace('{f}', t(rule.key))
+          .replace('{min}', rule.min)
+          .replace('{max}', rule.max));
+        invalid = true;
+      }
+    }
+
+    if (invalid) {
+      el.classList.add('invalid');
+      if (!firstInvalid) firstInvalid = el;
+    }
+  }
+
+  if (firstInvalid) firstInvalid.focus();
+  return errors;
+}
+
+function showFormErrors(errors) {
+  alert(t('err_title') + ':\n\n- ' + errors.join('\n- '));
+}
+
+function formatApiError(detail) {
+  if (Array.isArray(detail)) {
+    return detail.map(d => {
+      const field = Array.isArray(d.loc) ? d.loc[d.loc.length - 1] : '';
+      return (field ? field + ': ' : '') + (d.msg || String(d));
+    }).join('\n');
+  }
+  if (detail && typeof detail === 'object') return detail.msg || JSON.stringify(detail);
+  return String(detail || 'Error');
+}
+
 async function evaluar(e) {
-    e.preventDefault();
+    if (e) e.preventDefault();
+
+    const errors = validateForm();
+    if (errors.length) { showFormErrors(errors); return; }
+
     const btn = document.getElementById('btnEval');
     btn.disabled = true;
     btn.textContent = t('btn_proc');
 
+    const num = id => Number((document.getElementById(id).value || '').trim().replace(',', '.'));
+
     const body = {
-        id_paciente: document.getElementById('idPaciente').value,
-        edad: parseInt(document.getElementById('edad').value),
+        id_paciente: document.getElementById('idPaciente').value.trim(),
+        edad: Math.trunc(num('edad')),
         idioma: LANG,
         signos_vitales: {
-            frecuencia_cardiaca: parseInt(document.getElementById('fc').value),
-            presion_sistolica: parseInt(document.getElementById('pas').value),
-            presion_diastolica: parseInt(document.getElementById('pad').value),
-            temperatura: parseFloat(document.getElementById('temp').value),
-            saturacion_oxigeno: parseInt(document.getElementById('spo2').value)
+            frecuencia_cardiaca: Math.trunc(num('fc')),
+            presion_sistolica: Math.trunc(num('pas')),
+            presion_diastolica: Math.trunc(num('pad')),
+            temperatura: num('temp'),
+            saturacion_oxigeno: Math.trunc(num('spo2'))
         },
         nivel_conciencia: document.getElementById('conciencia').value,
         sintomas: {
@@ -1260,12 +1376,17 @@ async function evaluar(e) {
 
     try {
         const r = await fetch('/triaje', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-        if (!r.ok) { const e = await r.json(); alert('Error: ' + JSON.stringify(e.detail)); return; }
+        if (!r.ok) {
+            let detail = null;
+            try { detail = (await r.json()).detail; } catch (_) {}
+            alert('Error: ' + formatApiError(detail));
+            return;
+        }
         const d = await r.json();
         lastResult = d;
         showResult(d);
         pushHistory(d);
-    } catch(err) { alert('Error: ' + err.message); }
+    } catch(err) { alert(t('err_net').replace('{m}', err.message)); }
     finally { btn.disabled = false; btn.textContent = t('btn_eval'); }
 }
 
