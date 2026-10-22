@@ -20,7 +20,8 @@ function context() {
       if (!nodes.has(id)) nodes.set(id, element());
       return nodes.get(id);
     } } });
-  vm.runInContext('let history = [];\n' + script.slice(script.indexOf('const bgMap')), scope);
+  vm.runInContext('let history = [];\n' + script.slice(script.indexOf('const bgMap'),
+    script.indexOf('// Restore the language')), scope);
   return { scope, nodes };
 }
 
@@ -42,4 +43,37 @@ test('patient identifiers and alerts are rendered as text', () => {
   assert.equal(nodes.get('resAlertas').children[0].textContent, attack);
   assert.equal(chip.type, 'button');
   assert.doesNotThrow(() => chip.click());
+});
+
+test('a saved Quechua language initializes the full script and allows evaluation', async () => {
+  const nodes = new Map();
+  const title = { textContent: '', getAttribute: () => 'app_title' };
+  const buttons = ['es', 'qu'].map(lang => ({ dataset: { lang },
+    classList: { toggle(_name, active) { this.active = active; } } }));
+  const canvasContext = Object.fromEntries(['fillRect', 'beginPath', 'moveTo',
+    'lineTo', 'stroke', 'arc', 'fill'].map(name => [name, () => {}]));
+  const stored = new Map([['triaje_lang', 'qu']]);
+  const scope = vm.createContext({
+    localStorage: { getItem: key => stored.get(key), setItem: (key, value) => stored.set(key, value) },
+    document: { documentElement: {},
+      querySelectorAll: selector => selector === '[data-i18n]' ? [title] :
+        selector === '.lang-btn' ? buttons : [],
+      getElementById(id) {
+        if (!nodes.has(id)) nodes.set(id, { value: '75', style: {}, textContent: '',
+          parentElement: { clientWidth: 320, clientHeight: 100 }, getContext: () => canvasContext });
+        return nodes.get(id);
+      } },
+    window: { addEventListener() {} }, setInterval() {}, requestAnimationFrame() {},
+    fetch: async () => ({ ok: false, json: async () => ({ detail: 'validation' }) }),
+    alert() {},
+  });
+  assert.doesNotThrow(() => vm.runInContext(script, scope));
+  assert.equal(scope.document.documentElement.lang, 'qu');
+  assert.equal(title.textContent, vm.runInContext('I18N.qu.app_title', scope));
+  assert.equal(buttons[1].classList.active, true);
+  assert.ok(nodes.get('clock').textContent);
+  assert.equal(vm.runInContext('lastResult', scope), null);
+  await vm.runInContext('evaluar({ preventDefault() {} })', scope);
+  assert.equal(nodes.get('btnEval').disabled, false);
+  assert.equal(nodes.get('btnEval').textContent, vm.runInContext('I18N.qu.btn_eval', scope));
 });
