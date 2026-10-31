@@ -482,11 +482,10 @@
 
         .result-section.visible {
             display: block;
-            animation: fadeSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(12px); }
+            from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -693,6 +692,35 @@
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
 
+        /* Short, one-time entrances and restrained interaction feedback. */
+        .left-panel, .dash-content {
+            animation: fadeSlideUp 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .dash-content { animation-delay: 40ms; }
+        .history-chip {
+            transition: border-color 160ms ease, background-color 160ms ease,
+                        box-shadow 160ms ease, transform 160ms ease;
+        }
+        .history-chip:focus-visible, .lang-btn:focus-visible, .btn-primary:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+        }
+        @media (hover: hover) and (pointer: fine) {
+            .history-chip:hover {
+                transform: translateY(-1px);
+                background: var(--bg-secondary);
+                box-shadow: 0 2px 6px var(--accent-glow);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+            .btn-primary:active, .history-chip:hover { transform: none; }
+        }
+
         /* ===================== RESPONSIVE ===================== */
         @media (max-width: 1100px) {
             .main-grid { grid-template-columns: minmax(0, 1fr); height: auto; }
@@ -738,7 +766,7 @@
 </div>
 
 <!-- ===================== MAIN ===================== -->
-<div class="main-grid">
+<div class="main-grid" id="triageWorkspace">
 
     <!-- LEFT: FORM -->
     <div class="left-panel">
@@ -1073,6 +1101,7 @@ const COLOR_QU = { Rojo:'Puka', Naranja:"Q'illi", Amarillo:"Q'illu", Verde:"Q'um
 function t(key) { return (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key; }
 
 function setLang(lang) {
+  const previousLang = LANG;
   LANG = (lang === 'qu') ? 'qu' : 'es';
   localStorage.setItem('triaje_lang', LANG);
   document.documentElement.lang = LANG === 'qu' ? 'qu' : 'es';
@@ -1080,6 +1109,7 @@ function setLang(lang) {
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.lang === LANG);
   });
+  if (previousLang !== LANG) transitionContent(document.getElementById('triageWorkspace'), false);
 }
 
 function applyI18n() {
@@ -1390,6 +1420,19 @@ async function evaluar(e) {
     finally { btn.disabled = false; btn.textContent = t('btn_eval'); }
 }
 
+const contentAnimations = new WeakMap();
+
+function transitionContent(element, slide = true) {
+    if (!element) return;
+    contentAnimations.get(element)?.cancel();
+    if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches || !element.animate) return;
+    const animation = element.animate([
+        { opacity: 0.65, transform: slide ? 'translateY(6px)' : 'none' },
+        { opacity: 1, transform: 'none' }
+    ], { duration: slide ? 240 : 160, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
+    contentAnimations.set(element, animation);
+}
+
 const bgMap = { 1:'#fef2f2', 2:'#fff7ed', 3:'#fefce8', 4:'#f0fdf4', 5:'#eff6ff' };
 const txMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#2563eb' };
 const dotMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#3b82f6' };
@@ -1419,7 +1462,10 @@ function showResult(d, silent) {
         }));
     } else ar.style.display = 'none';
 
-    if (!silent) sec.classList.add('visible');
+    if (!silent) {
+        sec.classList.add('visible');
+        transitionContent(sec);
+    }
 }
 
 function pushHistory(d) {

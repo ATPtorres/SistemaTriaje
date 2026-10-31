@@ -20,7 +20,7 @@ function context() {
       if (!nodes.has(id)) nodes.set(id, element());
       return nodes.get(id);
     } } });
-  vm.runInContext('let history = [];\n' + script.slice(script.indexOf('const bgMap'),
+  vm.runInContext('let history = [];\n' + script.slice(script.indexOf('const contentAnimations'),
     script.indexOf('// Restore the language')), scope);
   return { scope, nodes };
 }
@@ -29,6 +29,25 @@ test('empty history renders without shadowing the translation function', () => {
   const { scope, nodes } = context();
   vm.runInContext('renderHistory()', scope);
   assert.match(nodes.get('historyStrip').innerHTML, /sin_evals/);
+});
+
+test('content transitions cancel previous motion and respect reduced motion', () => {
+  const { scope } = context();
+  const animations = [];
+  let cancelled = 0;
+  scope.panel = { animate(frames, options) {
+    animations.push({ frames, options });
+    return { cancel() { cancelled++; } };
+  } };
+  scope.matchMedia = () => ({ matches: false });
+  vm.runInContext('transitionContent(panel); transitionContent(panel)', scope);
+  assert.equal(animations.length, 2);
+  assert.equal(cancelled, 1);
+  scope.matchMedia = () => ({ matches: true });
+  vm.runInContext('transitionContent(panel)', scope);
+  assert.equal(animations.length, 2);
+  assert.equal(cancelled, 2);
+  assert.doesNotThrow(() => vm.runInContext('transitionContent(null); transitionContent({})', scope));
 });
 
 test('patient identifiers and alerts are rendered as text', () => {
