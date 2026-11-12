@@ -1,0 +1,1020 @@
+{
+  "version": "4.0.0",
+  "descripcion": "Reglas locales migradas del motor previo; prototipo no validado clínicamente.",
+  "fuente": "Migración de triage_engine.py en 0a81337. No representa una implementación oficial de ESI.",
+  "validacion_clinica": "pendiente",
+  "confianza_interpretacion": "Pesos de reglas no calibrados; no son probabilidades clínicas.",
+  "agregaciones": {
+    "num_alteraciones_vitales": [
+      "fc_alterada",
+      "pas_alterada",
+      "spo2_alterada",
+      "temp_alterada"
+    ],
+    "recursos_orientativos": [
+      "recurso_dolor_toracico",
+      "recurso_dificultad_respiratoria",
+      "recurso_sangrado_activo",
+      "recurso_trauma_significativo",
+      "recurso_fc_alterada",
+      "recurso_spo2_alterada",
+      "recurso_fiebre"
+    ]
+  },
+  "salidas": {
+    "1": {
+      "color": "Rojo",
+      "recomendacion": "Requiere valoración profesional inmediata."
+    },
+    "2": {
+      "color": "Naranja",
+      "recomendacion": "Requiere valoración profesional prioritaria y vigilancia."
+    },
+    "3": {
+      "color": "Amarillo",
+      "recomendacion": "Requiere valoración profesional y evaluación de recursos."
+    },
+    "4": {
+      "color": "Verde",
+      "recomendacion": "Requiere valoración profesional según el contexto clínico."
+    },
+    "5": {
+      "color": "Azul",
+      "recomendacion": "Solicitar valoración profesional; la ausencia de reglas activadas no excluye riesgo."
+    }
+  },
+  "respaldo": {
+    "id": "R999",
+    "nombre": "Sin criterio de clasificación activado",
+    "descripcion": "Resultado por defecto, no demuestra ausencia de riesgo",
+    "condiciones": [],
+    "conclusion": "No se activaron criterios de mayor prioridad en la base de conocimiento local.",
+    "nivel_asignado": 5,
+    "confianza": 0.0,
+    "prioridad": 0,
+    "activa": true,
+    "efectos": {},
+    "alertas": []
+  },
+  "reglas": [
+    {
+      "id": "H001",
+      "nombre": "fc < 50",
+      "descripcion": "fc < 50",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": "<",
+          "valor": 50
+        }
+      ],
+      "conclusion": "fc < 50",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "fc_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H002",
+      "nombre": "fc > 120",
+      "descripcion": "fc > 120",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": ">",
+          "valor": 120
+        }
+      ],
+      "conclusion": "fc > 120",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "fc_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H003",
+      "nombre": "pas < 90",
+      "descripcion": "pas < 90",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": "<",
+          "valor": 90
+        }
+      ],
+      "conclusion": "pas < 90",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "pas_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H004",
+      "nombre": "pas > 180",
+      "descripcion": "pas > 180",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": ">",
+          "valor": 180
+        }
+      ],
+      "conclusion": "pas > 180",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "pas_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H005",
+      "nombre": "spo2 < 94",
+      "descripcion": "spo2 < 94",
+      "condiciones": [
+        {
+          "hecho": "spo2",
+          "operador": "<",
+          "valor": 94
+        }
+      ],
+      "conclusion": "spo2 < 94",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "spo2_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H006",
+      "nombre": "temp < 35",
+      "descripcion": "temp < 35",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": "<",
+          "valor": 35
+        }
+      ],
+      "conclusion": "temp < 35",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "temp_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H007",
+      "nombre": "temp > 38",
+      "descripcion": "temp > 38",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": ">",
+          "valor": 38
+        }
+      ],
+      "conclusion": "temp > 38",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "temp_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H010",
+      "nombre": "Recurso orientativo por dolor_toracico",
+      "descripcion": "Recurso orientativo por dolor_toracico",
+      "condiciones": [
+        {
+          "hecho": "dolor_toracico",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por dolor_toracico",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_dolor_toracico": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H011",
+      "nombre": "Recurso orientativo por dificultad_respiratoria",
+      "descripcion": "Recurso orientativo por dificultad_respiratoria",
+      "condiciones": [
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por dificultad_respiratoria",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_dificultad_respiratoria": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H012",
+      "nombre": "Recurso orientativo por sangrado_activo",
+      "descripcion": "Recurso orientativo por sangrado_activo",
+      "condiciones": [
+        {
+          "hecho": "sangrado_activo",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por sangrado_activo",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_sangrado_activo": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H013",
+      "nombre": "Recurso orientativo por trauma_significativo",
+      "descripcion": "Recurso orientativo por trauma_significativo",
+      "condiciones": [
+        {
+          "hecho": "trauma_significativo",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por trauma_significativo",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_trauma_significativo": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H014",
+      "nombre": "Recurso orientativo por fc_alterada",
+      "descripcion": "Recurso orientativo por fc_alterada",
+      "condiciones": [
+        {
+          "hecho": "fc_alterada",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por fc_alterada",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_fc_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H015",
+      "nombre": "Recurso orientativo por spo2_alterada",
+      "descripcion": "Recurso orientativo por spo2_alterada",
+      "condiciones": [
+        {
+          "hecho": "spo2_alterada",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Recurso orientativo por spo2_alterada",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_spo2_alterada": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "H016",
+      "nombre": "Recurso orientativo por fiebre",
+      "descripcion": "Recurso orientativo por fiebre",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": ">",
+          "valor": 38
+        }
+      ],
+      "conclusion": "Recurso orientativo por fiebre",
+      "confianza": 1.0,
+      "prioridad": 100,
+      "activa": true,
+      "efectos": {
+        "recurso_fiebre": true
+      },
+      "alertas": []
+    },
+    {
+      "id": "R001",
+      "nombre": "Paciente inconsciente (sin respuesta a estímulos)",
+      "descripcion": "Paciente inconsciente (sin respuesta a estímulos)",
+      "condiciones": [
+        {
+          "hecho": "conciencia",
+          "operador": "==",
+          "valor": "Inconsciente"
+        }
+      ],
+      "conclusion": "Paciente inconsciente (sin respuesta a estímulos)",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R002",
+      "nombre": "Convulsiones activas",
+      "descripcion": "Convulsiones activas",
+      "condiciones": [
+        {
+          "hecho": "convulsiones",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Convulsiones activas",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R003",
+      "nombre": "Saturación de oxígeno crítica",
+      "descripcion": "Saturación de oxígeno crítica",
+      "condiciones": [
+        {
+          "hecho": "spo2",
+          "operador": "<",
+          "valor": 90
+        }
+      ],
+      "conclusion": "Saturación de oxígeno crítica",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Hipoxemia severa"
+      ],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R004",
+      "nombre": "Frecuencia cardíaca extremadamente baja",
+      "descripcion": "Frecuencia cardíaca extremadamente baja",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": "<=",
+          "valor": 20
+        }
+      ],
+      "conclusion": "Frecuencia cardíaca extremadamente baja",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Bradicardia severa/muerte cardíaca"
+      ],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R005",
+      "nombre": "Shock hipotensivo con alteración de conciencia",
+      "descripcion": "Shock hipotensivo con alteración de conciencia",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": "<",
+          "valor": 80
+        },
+        {
+          "hecho": "conciencia",
+          "operador": "in",
+          "valor": [
+            "Dolor",
+            "Inconsciente"
+          ]
+        }
+      ],
+      "conclusion": "Shock hipotensivo con alteración de conciencia",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Shock hipotensivo"
+      ],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R006",
+      "nombre": "Sangrado activo con hipotensión",
+      "descripcion": "Sangrado activo con hipotensión",
+      "condiciones": [
+        {
+          "hecho": "sangrado_activo",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "pas",
+          "operador": "<",
+          "valor": 90
+        }
+      ],
+      "conclusion": "Sangrado activo con hipotensión",
+      "confianza": 1.0,
+      "prioridad": 90,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Hemorragia activa con inestabilidad"
+      ],
+      "nivel_asignado": 1
+    },
+    {
+      "id": "R010",
+      "nombre": "Alteración del nivel de conciencia",
+      "descripcion": "Alteración del nivel de conciencia",
+      "condiciones": [
+        {
+          "hecho": "conciencia",
+          "operador": "in",
+          "valor": [
+            "Verbal",
+            "Dolor"
+          ]
+        }
+      ],
+      "conclusion": "Alteración del nivel de conciencia",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Alteración neurológica"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R011",
+      "nombre": "Dolor torácico reportado",
+      "descripcion": "Dolor torácico reportado",
+      "condiciones": [
+        {
+          "hecho": "dolor_toracico",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Dolor torácico reportado",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Dolor torácico"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R012",
+      "nombre": "Dificultad respiratoria con desaturación",
+      "descripcion": "Dificultad respiratoria con desaturación",
+      "condiciones": [
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "spo2",
+          "operador": "<",
+          "valor": 94
+        }
+      ],
+      "conclusion": "Dificultad respiratoria con desaturación",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Insuficiencia respiratoria"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R013",
+      "nombre": "Dificultad respiratoria con taquicardia",
+      "descripcion": "Dificultad respiratoria con taquicardia",
+      "condiciones": [
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "spo2",
+          "operador": ">=",
+          "valor": 94
+        },
+        {
+          "hecho": "fc",
+          "operador": ">",
+          "valor": 120
+        }
+      ],
+      "conclusion": "Dificultad respiratoria con taquicardia",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Taquicardia compensatoria"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R014",
+      "nombre": "Taquicardia severa",
+      "descripcion": "Taquicardia severa",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": ">",
+          "valor": 150
+        },
+        {
+          "hecho": "dolor_toracico",
+          "operador": "==",
+          "valor": false
+        },
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": false
+        }
+      ],
+      "conclusion": "Taquicardia severa",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Taquicardia severa"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R015",
+      "nombre": "Bradicardia con alteración de conciencia",
+      "descripcion": "Bradicardia con alteración de conciencia",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": "<",
+          "valor": 50
+        },
+        {
+          "hecho": "conciencia",
+          "operador": "!=",
+          "valor": "Alerta"
+        }
+      ],
+      "conclusion": "Bradicardia con alteración de conciencia",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Bradicardia"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R016",
+      "nombre": "Hipotensión arterial",
+      "descripcion": "Hipotensión arterial",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": "<",
+          "valor": 90
+        },
+        {
+          "hecho": "conciencia",
+          "operador": "==",
+          "valor": "Alerta"
+        }
+      ],
+      "conclusion": "Hipotensión arterial",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Hipotensión"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R017",
+      "nombre": "Fiebre alta con alteración de conciencia",
+      "descripcion": "Fiebre alta con alteración de conciencia",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": ">",
+          "valor": 39.5
+        },
+        {
+          "hecho": "conciencia",
+          "operador": "!=",
+          "valor": "Alerta"
+        }
+      ],
+      "conclusion": "Fiebre alta con alteración de conciencia",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Fiebre con compromiso neurológico"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R018",
+      "nombre": "Presión sistólica muy elevada",
+      "descripcion": "Presión sistólica muy elevada",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": ">",
+          "valor": 200
+        }
+      ],
+      "conclusion": "Presión sistólica muy elevada",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Crisis hipertensiva"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R019",
+      "nombre": "Presión diastólica muy elevada",
+      "descripcion": "Presión diastólica muy elevada",
+      "condiciones": [
+        {
+          "hecho": "pad",
+          "operador": ">",
+          "valor": 120
+        }
+      ],
+      "conclusion": "Presión diastólica muy elevada",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Crisis hipertensiva"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R020",
+      "nombre": "Paciente menor de dos años con fiebre",
+      "descripcion": "Paciente menor de dos años con fiebre",
+      "condiciones": [
+        {
+          "hecho": "edad",
+          "operador": "<",
+          "valor": 2
+        },
+        {
+          "hecho": "temp",
+          "operador": ">",
+          "valor": 38
+        }
+      ],
+      "conclusion": "Paciente menor de dos años con fiebre",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Paciente pediatrico de riesgo"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R021",
+      "nombre": "Paciente menor de dos años con dificultad respiratoria",
+      "descripcion": "Paciente menor de dos años con dificultad respiratoria",
+      "condiciones": [
+        {
+          "hecho": "edad",
+          "operador": "<",
+          "valor": 2
+        },
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Paciente menor de dos años con dificultad respiratoria",
+      "confianza": 1.0,
+      "prioridad": 80,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Paciente pediatrico de riesgo"
+      ],
+      "nivel_asignado": 2
+    },
+    {
+      "id": "R030",
+      "nombre": "Múltiples alteraciones vitales",
+      "descripcion": "Múltiples alteraciones vitales",
+      "condiciones": [
+        {
+          "hecho": "num_alteraciones_vitales",
+          "operador": ">=",
+          "valor": 2
+        }
+      ],
+      "conclusion": "Múltiples alteraciones vitales",
+      "confianza": 1.0,
+      "prioridad": 70,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Múltiples constantes vitales alteradas"
+      ],
+      "nivel_asignado": 3
+    },
+    {
+      "id": "R031",
+      "nombre": "Dolor intenso (EVA >= 7) con presión arterial conservada",
+      "descripcion": "Dolor intenso (EVA >= 7) con presión arterial conservada",
+      "condiciones": [
+        {
+          "hecho": "dolor_intenso",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "pas",
+          "operador": ">=",
+          "valor": 90
+        }
+      ],
+      "conclusion": "Dolor intenso (EVA >= 7) con presión arterial conservada",
+      "confianza": 1.0,
+      "prioridad": 70,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 3
+    },
+    {
+      "id": "R032",
+      "nombre": "Sangrado activo con presión arterial conservada",
+      "descripcion": "Sangrado activo con presión arterial conservada",
+      "condiciones": [
+        {
+          "hecho": "sangrado_activo",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "pas",
+          "operador": ">=",
+          "valor": 90
+        }
+      ],
+      "conclusion": "Sangrado activo con presión arterial conservada",
+      "confianza": 1.0,
+      "prioridad": 70,
+      "activa": true,
+      "efectos": {},
+      "alertas": [
+        "Hemorragia activa compensada"
+      ],
+      "nivel_asignado": 3
+    },
+    {
+      "id": "R033",
+      "nombre": "Trauma significativo que requiere múltiples evaluaciones",
+      "descripcion": "Trauma significativo que requiere múltiples evaluaciones",
+      "condiciones": [
+        {
+          "hecho": "trauma_significativo",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "recursos_orientativos",
+          "operador": ">=",
+          "valor": 2
+        }
+      ],
+      "conclusion": "Trauma significativo que requiere múltiples evaluaciones",
+      "confianza": 1.0,
+      "prioridad": 70,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 3
+    },
+    {
+      "id": "R034",
+      "nombre": "Fiebre con alteración conductual",
+      "descripcion": "Fiebre con alteración conductual",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": ">",
+          "valor": 38
+        },
+        {
+          "hecho": "alteracion_conducta",
+          "operador": "==",
+          "valor": true
+        }
+      ],
+      "conclusion": "Fiebre con alteración conductual",
+      "confianza": 1.0,
+      "prioridad": 70,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 3
+    },
+    {
+      "id": "R040",
+      "nombre": "Fiebre sin criterios de mayor prioridad",
+      "descripcion": "Fiebre sin criterios de mayor prioridad",
+      "condiciones": [
+        {
+          "hecho": "temp",
+          "operador": ">=",
+          "valor": 38
+        },
+        {
+          "hecho": "temp",
+          "operador": "<=",
+          "valor": 39.5
+        }
+      ],
+      "conclusion": "Fiebre sin criterios de mayor prioridad",
+      "confianza": 1.0,
+      "prioridad": 60,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 4
+    },
+    {
+      "id": "R041",
+      "nombre": "Bradicardia leve",
+      "descripcion": "Bradicardia leve",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": ">=",
+          "valor": 50
+        },
+        {
+          "hecho": "fc",
+          "operador": "<",
+          "valor": 60
+        }
+      ],
+      "conclusion": "Bradicardia leve",
+      "confianza": 1.0,
+      "prioridad": 60,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 4
+    },
+    {
+      "id": "R042",
+      "nombre": "Taquicardia leve",
+      "descripcion": "Taquicardia leve",
+      "condiciones": [
+        {
+          "hecho": "fc",
+          "operador": ">",
+          "valor": 100
+        },
+        {
+          "hecho": "fc",
+          "operador": "<=",
+          "valor": 120
+        }
+      ],
+      "conclusion": "Taquicardia leve",
+      "confianza": 1.0,
+      "prioridad": 60,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 4
+    },
+    {
+      "id": "R043",
+      "nombre": "Presión sistólica levemente reducida",
+      "descripcion": "Presión sistólica levemente reducida",
+      "condiciones": [
+        {
+          "hecho": "pas",
+          "operador": ">=",
+          "valor": 85
+        },
+        {
+          "hecho": "pas",
+          "operador": "<",
+          "valor": 90
+        }
+      ],
+      "conclusion": "Presión sistólica levemente reducida",
+      "confianza": 1.0,
+      "prioridad": 60,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 4
+    },
+    {
+      "id": "R044",
+      "nombre": "Dificultad respiratoria leve con SpO2 conservada",
+      "descripcion": "Dificultad respiratoria leve con SpO2 conservada",
+      "condiciones": [
+        {
+          "hecho": "dificultad_respiratoria",
+          "operador": "==",
+          "valor": true
+        },
+        {
+          "hecho": "spo2",
+          "operador": ">=",
+          "valor": 94
+        }
+      ],
+      "conclusion": "Dificultad respiratoria leve con SpO2 conservada",
+      "confianza": 1.0,
+      "prioridad": 60,
+      "activa": true,
+      "efectos": {},
+      "alertas": [],
+      "nivel_asignado": 4
+    }
+  ]
+}

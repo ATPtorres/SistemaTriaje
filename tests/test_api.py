@@ -143,3 +143,77 @@ def test_daily_statistics_refresh_without_dashboard_request(api):
 def test_public_information_endpoints(api, path):
     client, _ = api
     assert client.get(path).status_code == 200
+
+
+def test_decision_explanation_and_persisted_snapshot_are_consistent(api):
+    client, factory = api
+    data = payload('TRACE-1')
+    data['signos_vitales']['frecuencia_cardiaca'] = 130
+    data['sintomas'] = {'trauma_significativo': True}
+    response = client.post('/triaje', json=data)
+    assert response.status_code == 200, response.text
+    result = response.json()
+    explanation = result['metadata_motor']['explicaciones']
+    assert result['nivel_prioridad'] == explanation['how']['nivel_asignado'] == 3
+    assert result['metadata_motor']['conocimiento']['validacion_clinica'] == 'pendiente'
+    detail = client.get('/evaluaciones/' + result['metadata_motor']['id_evaluacion']).json()['evaluacion']
+    assert detail['explicaciones'] == explanation
+    assert detail['traza_inferencia'] == result['metadata_motor']['traza_completa']
+    assert len(detail['traza_inferencia']) > 20  # The old API truncated the audit trail.
+    with factory() as db:
+        saved = db.scalar(select(EvaluacionTriaje))
+        assert saved.nivel_prioridad == 3
+        assert saved.explicaciones['conocimiento']['sha256'] == result['metadata_motor']['conocimiento']['sha256']
+        assert saved.explicaciones['conocimiento']['snapshot']['version'] == '4.0.0'
+        assert saved.nivel_mts is saved.nivel_ctas is saved.nivel_ats is saved.nivel_esi is None
+
+
+def test_official_protocols_are_not_fabricated(api):
+    client, _ = api
+    protocols = client.get('/protocols').json()
+    assert protocols['validacion_clinica'] == 'pendiente'
+    assert all(p['estado'] == 'no_implementado' for p in protocols['protocolos'] if p['id'] != 'LOCAL')
+    result = client.post('/triaje', json=payload()).json()
+    for name, field in [('esi', 'nivel'), ('mts', 'nivel_mts'), ('ctas', 'nivel_ctas'), ('ats', 'nivel_ats')]:
+        protocol = result['soporte_clinico']['protocolos'][name]
+        assert protocol[field] is None
+        assert protocol['equivalencia_clinica'] is False
+    assert result['soporte_clinico']['protocolos']['local']['nivel'] == result['nivel_prioridad']
+
+
+def test_bad_knowledge_blocks_evaluation_without_saving_patient(api, monkeypatch, tmp_path):
+    client, factory = api
+    path = tmp_path / 'broken.json'
+    path.write_text('{"reglas": "invalid"}')
+    monkeypatch.setenv('TRIAGE_KNOWLEDGE_PATH', str(path))
+    for endpoint in ['/knowledge-base', '/health']:
+        assert client.get(endpoint).status_code == 503
+    response = client.post('/triaje', json=payload())
+    assert response.status_code == 503
+    assert str(path) not in response.text
+    with factory() as db:
+        assert db.scalar(select(func.count()).select_from(Paciente)) == 0
+        assert db.scalar(select(func.count()).select_from(EvaluacionTriaje)) == 0
+
+
+def test_detail_uses_vitals_of_the_requested_evaluation(api):
+    client, _ = api
+    data = payload('AUDIT-SAME-PATIENT')
+    first = client.post('/triaje', json=data).json()
+    data['signos_vitales']['saturacion_oxigeno'] = 82
+    second = client.post('/triaje', json=data).json()
+    assert second['nivel_prioridad'] == 1
+    detail = client.get('/evaluaciones/' + first['metadata_motor']['id_evaluacion']).json()
+    assert detail['signos_vitales'][0]['spo2'] == 98
+    assert detail['evaluacion']['explicaciones']['how']['nivel_asignado'] == 5
+
+
+def test_startup_rejects_bad_rules_before_initializing_database(monkeypatch, tmp_path):
+    from knowledge_base import KnowledgeConfigurationError
+    monkeypatch.setenv('TRIAGE_KNOWLEDGE_PATH', str(tmp_path / 'missing.json'))
+    def must_not_initialize():
+        pytest.fail('Database initialization must not run with invalid rules')
+    monkeypatch.setattr(main, 'init_db', must_not_initialize)
+    with pytest.raises(KnowledgeConfigurationError):
+        with TestClient(main.app):
+            pass

@@ -20,7 +20,7 @@ function context() {
       if (!nodes.has(id)) nodes.set(id, element());
       return nodes.get(id);
     } } });
-  vm.runInContext('let history = [];\n' + script.slice(script.indexOf('const contentAnimations'),
+  vm.runInContext('let history = []; let lastResult = null;\n' + script.slice(script.indexOf('const contentAnimations'),
     script.indexOf('// Restore the language')), scope);
   return { scope, nodes };
 }
@@ -62,6 +62,30 @@ test('patient identifiers and alerts are rendered as text', () => {
   assert.equal(nodes.get('resAlertas').children[0].textContent, attack);
   assert.equal(chip.type, 'button');
   assert.doesNotThrow(() => chip.click());
+});
+
+test('reasoning is safe text and history keeps the selected explanation', () => {
+  const { scope, nodes } = context();
+  const attack = '<img src=x onerror=alert(1)>';
+  scope.result = { id_paciente: 'EXPERT-1', nivel_prioridad: 2, color: 'Naranja',
+    motivo_clinico: 'test', recomendacion: 'test', metadata_motor: {
+      explicaciones: { trace: [{ regla_id: 'R011', activa: true, decisiva: true,
+        iteracion: 1, conclusion: attack, condiciones_evaluadas: [] }],
+        conocimiento: { version: '4.0.0', sha256: 'abc' } } } };
+  vm.runInContext('pushHistory(result); showResult(result)', scope);
+  const item = nodes.get('reasoningSteps').children[0];
+  assert.ok(item.textContent.includes(attack));
+  assert.equal(item.innerHTML, undefined);
+  assert.equal(nodes.get('reasoningDetails').hidden, false);
+  assert.match(nodes.get('reasoningKnowledge').textContent, /4\.0\.0/);
+  scope.other = { id_paciente: 'EXPERT-2', nivel_prioridad: 5, color: 'Azul',
+    motivo_clinico: 'other', recomendacion: 'other' };
+  vm.runInContext('showResult(other)', scope);
+  assert.equal(nodes.get('reasoningDetails').hidden, true);
+  assert.equal(nodes.get('reasoningSteps').children.length, 0);
+  nodes.get('historyStrip').children[0].click();
+  assert.equal(vm.runInContext('lastResult === result', scope), true);
+  assert.equal(nodes.get('reasoningDetails').hidden, false);
 });
 
 test('a saved Quechua language initializes the full script and allows evaluation', async () => {

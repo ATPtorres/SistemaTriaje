@@ -2,7 +2,7 @@
 models.py - Modelos de datos para el Sistema Experto de Triaje
 ==============================================================
 Define las estructuras Pydantic para entrada y salida del sistema.
-Basado en el modelo Emergency Severity Index (ESI) de 5 niveles.
+Prioridades locales de cinco niveles; no equivalen a un protocolo oficial validado.
 """
 
 from enum import Enum
@@ -221,7 +221,7 @@ class ResultadoTriaje(BaseModel):
     nivel_prioridad: int = Field(
         ..., 
         ge=1, le=5,
-        description="Nivel de prioridad ESI (1=resucitación, 5=no urgente)"
+        description="Prioridad local (1=mayor urgencia, 5=respaldo); prototipo no validado clínicamente"
     )
     color: str = Field(
         ..., 

@@ -7,7 +7,7 @@ Sistema Experto completo con:
 - Base de conocimiento editable
 - Sistema de explicaciones (WHY/HOW/TRACE)
 - Soporte clinico: diagnosticos diferenciales
-- Multiples protocolos: ESI, MTS, CTAS, ATS
+- Prioridades locales; protocolos oficiales pendientes de implementación
 - Base de datos MySQL (XAMPP)
 
 Ejecucion:
@@ -34,7 +34,7 @@ from models import DatosPaciente, ResultadoTriaje
 from schemas import PacienteCreate
 from triage_engine import evaluar_triaje
 from fuzzy_engine import calcular_score_riesgo_difuso
-from knowledge_base import BaseConocimiento
+from knowledge_base import BaseConocimiento, KnowledgeConfigurationError
 from clinical_support import obtener_soporte_clinico_completo
 from i18n import traducir_resultado
 
@@ -58,6 +58,7 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    BaseConocimiento()  # Fail startup on invalid or missing rules.
     init_db()
     logger.info("Base de datos inicializada correctamente")
     yield
@@ -68,12 +69,18 @@ app = FastAPI(
     title="Sistema Experto de Triaje Medico",
     description=(
         "Sistema Experto completo con MySQL para clasificacion automatizada de pacientes "
-        "en urgencias. Integra: motor de reglas, logica difusa, base de conocimiento, "
-        "sistema de explicaciones y soporte clinico con multiples protocolos (ESI, MTS, CTAS, ATS)."
+        "en un prototipo académico no validado clínicamente. Integra: reglas locales, lógica difusa, "
+        "explicaciones trazables y estado de implementación de protocolos oficiales."
     ),
-    version="3.0.0",
+    version="4.0.0",
     contact={"name": "Equipo de Desarrollo", "email": "dev@triaje-sistema.com"}
 )
+
+
+@app.exception_handler(KnowledgeConfigurationError)
+async def knowledge_unavailable(_request, _exc):
+    return JSONResponse(status_code=503, content={
+        "detail": "Base de conocimiento no disponible; no se emitió clasificación."})
 
 
 # =============================================================================
@@ -96,10 +103,10 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
     Endpoint principal del Sistema Experto de Triaje.
     
     Pipeline de evaluacion:
-    1. Motor de reglas clasico (forward chaining) -> Nivel ESI
+    1. Reglas locales versionadas -> prioridad y explicación de una misma ejecución
     2. Motor de logica difusa (Mamdani FIS) -> Score de riesgo
-    3. Base de conocimiento -> Explicaciones WHY/HOW/TRACE
-    4. Soporte clinico -> Diagnosticos diferenciales + Protocolos
+    3. Conservación de reglas decisivas, hechos y procedencia
+    4. Soporte heurístico y estado explícito de protocolos no implementados
     5. Guardar todo en MySQL
     """
     inicio = time.perf_counter()
@@ -117,10 +124,9 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
             paciente.edad
         )
 
-        # Paso 3: Base de conocimiento y explicaciones
-        kb = BaseConocimiento()
-        kb.establecer_hechos(paciente.model_dump())
-        nivel_kb, traza_kb, explicacion_kb = kb.forward_chaining()
+        # One decision and one explanation from exactly the same rule execution.
+        traza_kb = resultado.metadata_motor["traza_completa"]
+        explicacion_kb = resultado.metadata_motor["explicaciones"]
 
         # Paso 4: Soporte clinico
         datos_paciente = paciente.model_dump()
@@ -150,10 +156,10 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
             "score_riesgo_difuso": round(score_difuso, 1),
             "score_riesgo_multifactor": score_risk.get("score"),
             "nivel_riesgo": score_risk.get("nivel_riesgo"),
-            "metodo_inferencia": "Forward Chaining + Fuzzy Logic (Mamdani)",
+            "metodo_inferencia": "Forward Chaining (reglas locales); score difuso auxiliar",
             "reglas_evaluadas": len(traza_kb),
             "reglas_activadas": len([p for p in traza_kb if p["activa"]]),
-            "traza_inferencia": traza_kb[:20],
+            "traza_inferencia": traza_kb,
             "explicaciones": explicacion_kb,
             "nivel_esi": soporte.get("protocolos", {}).get("esi", {}).get("nivel"),
             "nivel_mts": soporte.get("protocolos", {}).get("mts", {}).get("nivel_mts"),
@@ -203,16 +209,20 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
         # Enriquecer resultado
         resultado.score_riesgo_difuso = round(score_difuso, 1)
         resultado.metadata_motor = {
+            **resultado.metadata_motor,
             "id_evaluacion": id_eval,
-            "metodo_inferencia": "Forward Chaining + Fuzzy Logic (Mamdani)",
+            "metodo_inferencia": "Forward Chaining (reglas locales); score difuso auxiliar",
             "reglas_evaluadas": len(traza_kb),
             "reglas_activadas": len([p for p in traza_kb if p["activa"]]),
             "explicaciones": explicacion_kb,
             "traza_completa": traza_kb,
             "logica_difusa": {
+                "uso": "Indicador auxiliar no validado; no determina el nivel",
                 "score": round(score_difuso, 1),
                 "num_reglas_activas": meta_difuso.get("num_reglas_activas", 0),
             },
+            "idioma_explicaciones": "es",
+            "traduccion_clinica": "no_validada",
             "guardado_en_bd": True,
             "duracion_ms": duracion_ms,
         }
@@ -225,6 +235,10 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
         db.commit()
         return resultado
 
+    except KnowledgeConfigurationError:
+        db.rollback()
+        logger.exception("Configuración de conocimiento inválida")
+        raise HTTPException(status_code=503, detail="Base de conocimiento no disponible; no se emitió clasificación.")
     except IntegrityError:
         db.rollback()
         raise HTTPException(status_code=409, detail="Conflicto al guardar el paciente; vuelva a intentar.")
@@ -326,7 +340,7 @@ def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(get_db
     if not eval_db:
         raise HTTPException(status_code=404, detail="Evaluacion no encontrada")
 
-    sv = crud.obtener_historial_signos(db, eval_db.paciente_id, 1)
+    sv = eval_db.signos_vitales
     alertas = crud.obtener_alertas_evaluacion(db, eval_db.id)
     diagnosticos = crud.obtener_diagnosticos_evaluacion(db, eval_db.id)
 
@@ -343,6 +357,9 @@ def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(get_db
             "reglas_activadas": eval_db.reglas_activadas,
             "fecha": eval_db.fecha_evaluacion.isoformat() if eval_db.fecha_evaluacion else None,
             "duracion_ms": eval_db.duracion_ms,
+            "explicaciones": eval_db.explicaciones,
+            "traza_inferencia": eval_db.traza_inferencia,
+            "alcance_protocolos": "Reglas locales; los campos históricos no certifican protocolos oficiales",
             "protocolos": {
                 "esi": eval_db.nivel_esi,
                 "mts": eval_db.nivel_mts,
@@ -381,7 +398,12 @@ def consultar_base_conocimiento():
     """Retorna todas las reglas de la base de conocimiento del sistema experto."""
     kb = BaseConocimiento()
     return {
-        "total_reglas": len(kb.reglas),
+        "total_reglas": len(kb.listar_reglas_activas()),
+        "version": kb.config.version,
+        "sha256": kb.sha256,
+        "validacion_clinica": kb.config.validacion_clinica,
+        "fuente": kb.config.fuente,
+        "confianza_interpretacion": kb.config.confianza_interpretacion,
         "reglas": kb.listar_reglas_activas(),
         "arbol_decision": "Disponible en /decision-tree"
     }
@@ -407,15 +429,10 @@ def arbol_decision():
 
 @app.get("/protocols", summary="Protocolos de triaje disponibles", tags=["Conocimiento"])
 def listar_protocolos():
-    """Lista los protocolos de triaje implementados en el sistema."""
-    return {
-        "protocolos": [
-            {"id": "ESI", "nombre": "Emergency Severity Index", "version": "v4", "organizacion": "ACEP"},
-            {"id": "MTS", "nombre": "Manchester Triage System", "version": "2014", "organizacion": "Manchester Triage Group"},
-            {"id": "CTAS", "nombre": "Canadian Triage and Acuity Scale", "version": "v5", "organizacion": "CAEP"},
-            {"id": "ATS", "nombre": "Australasian Triage Scale", "version": "2006", "organizacion": "ACEM"},
-        ]
-    }
+    """Distingue el motor local de los protocolos pendientes de implementación."""
+    from clinical_support import catalogo_protocolos
+    return {"protocolos": catalogo_protocolos(), "validacion_clinica": "pendiente"}
+
 
 
 @app.get("/fuzzy-membership", summary="Funciones de pertenencia difusas", tags=["Conocimiento"])
@@ -510,13 +527,22 @@ def health_check(db: Session = Depends(get_db)):
         db.rollback()
         db_status = "disconnected"
 
-    return JSONResponse(status_code=200 if db_status == "connected" else 503, content={
-        "status": "healthy" if db_status == "connected" else "degraded",
+    try:
+        knowledge = BaseConocimiento()
+        knowledge_status = {"estado": "disponible", "version": knowledge.config.version,
+                            "sha256": knowledge.sha256}
+    except KnowledgeConfigurationError:
+        knowledge_status = {"estado": "no_disponible"}
+    ready = db_status == "connected" and knowledge_status["estado"] == "disponible"
+    return JSONResponse(status_code=200 if ready else 503, content={
+        "status": "healthy" if ready else "degraded",
         "service": "sistema-triaje-experto",
-        "version": "3.0.0",
+        "version": "4.0.0",
         "database": db_status,
         "modulos": ["triage_engine", "fuzzy_engine", "knowledge_base", "clinical_support"],
-        "protocolos": ["ESI", "MTS", "CTAS", "ATS"]
+        "conocimiento": knowledge_status,
+        "validacion_clinica": "pendiente",
+        "protocolos": ["LOCAL"]
     })
 
 

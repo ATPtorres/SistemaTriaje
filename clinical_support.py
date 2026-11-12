@@ -4,11 +4,11 @@ clinical_support.py - Soporte Clinico y Protocolos Multiples
 Modulo de apoyo a la decision clinica que implementa:
 
 1. DIAGNOSTICOS PROBABLES:
-   - Inferencia bayesiana simplificada
+   - Matching heurístico sin calibración probabilística
    - Matching de patron sintomatico
-   - Lista de diferencial ordenada por probabilidad
+   - Lista ordenada por peso heurístico (no probabilidad clínica)
 
-2. PROTOCOLOS DE TRIAJE MULTIPLES:
+2. PROTOCOLOS OFICIALES PENDIENTES DE IMPLEMENTACIÓN:
    - ESI (Emergency Severity Index) - ACEP
    - MTS (Manchester Triage System)
    - CTAS (Canadian Triage and Acuity Scale)
@@ -38,7 +38,7 @@ class DiagnosticoDiferencial:
     codigo: str
     nombre: str
     especialidad: str
-    probabilidad: float  # 0-1
+    probabilidad: float  # Campo heredado: peso heurístico 0-1, no calibrado
     evidencia: list[str]  # Evidencias que lo soportan
     estudios_sugeridos: list[str]
     conducta: str
@@ -177,133 +177,48 @@ PATRONES_DIAGNOSTICOS: list[dict] = [
 # PROTOCOLOS DE TRIAJE MULTIPLES
 # =============================================================================
 
-class ProtocoloESI:
-    """
-    Emergency Severity Index (ESI) v4
-    American College of Emergency Physicians (ACEP)
-    
-    5 Niveles basados en:
-    - Riesgo vital inmediato
-    - Nivel de conciencia
-    - Recursos necesarios
-    """
-    nombre = "ESI (Emergency Severity Index)"
-    version = "v4"
-    organizacion = "ACEP"
+def catalogo_protocolos():
+    return [
+        {"id": "LOCAL", "nombre": "Reglas locales de prioridad", "estado": "prototipo_no_validado",
+         "independiente": True, "validacion_clinica": "pendiente"},
+        *[{"id": key, "nombre": name, "estado": "no_implementado",
+           "independiente": False, "validacion_clinica": "pendiente",
+           "requisitos": "Algoritmo oficial, datos específicos y revisión clínica"}
+          for key, name in [("ESI", "Emergency Severity Index"),
+                            ("MTS", "Manchester Triage System"),
+                            ("CTAS", "Canadian Triage and Acuity Scale"),
+                            ("ATS", "Australasian Triage Scale")]],
+    ]
 
+
+def protocolo_no_implementado(nombre, campo):
+    # A local priority is not a valid conversion to an official protocol.
+    return {"protocolo": nombre, campo: None, "estado": "no_implementado",
+            "validacion_clinica": "pendiente", "equivalencia_clinica": False}
+
+
+class ProtocoloESI:
     @staticmethod
-    def clasificar(nivel_motor: int) -> dict:
-        niveles = {
-            1: {"color": "Rojo", "tiempo": "Inmediato", "recursos": "Multi-organico", "descripcion": "Resucitacion"},
-            2: {"color": "Naranja", "tiempo": "<10 min", "recursos": "Multiple", "descripcion": "Emergencia"},
-            3: {"color": "Amarillo", "tiempo": "<30 min", "recursos": "Multiple", "descripcion": "Urgente"},
-            4: {"color": "Verde", "tiempo": "<60 min", "recursos": "1 recurso", "descripcion": "Menos urgente"},
-            5: {"color": "Azul", "tiempo": "<120 min", "recursos": "0 recursos", "descripcion": "No urgente"},
-        }
-        info = niveles.get(nivel_motor, niveles[5])
-        return {
-            "protocolo": "ESI",
-            "nivel": nivel_motor,
-            "color": info["color"],
-            "tiempo_espera": info["tiempo"],
-            "recursos_necesarios": info["recursos"],
-            "descripcion": info["descripcion"]
-        }
+    def clasificar(nivel_motor):
+        return protocolo_no_implementado("ESI", "nivel")
 
 
 class ProtocoloMTS:
-    """
-    Manchester Triage System (MTS)
-    Mackway-Jones & Marsden (2006)
-    
-    5 niveles con colores diferentes al ESI.
-    Usa flujos de presentacion (presenting complaint flows).
-    """
-    nombre = "MTS (Manchester Triage System)"
-    version = "2014"
-    organizacion = "Manchester Triage Group"
-
     @staticmethod
-    def clasificar(nivel_motor: int, sintomas: dict = None) -> dict:
-        # Mapeo ESI -> MTS (similar pero con diferencias)
-        mapeo = {
-            1: {"nivel_mts": 1, "color": "Rojo", "descripcion": "Reanimacion inmediata",
-                "tiempo": "Inmediato"},
-            2: {"nivel_mts": 2, "color": "Naranja", "descripcion": "Emergencia",
-                "tiempo": "<10 min"},
-            3: {"nivel_mts": 3, "color": "Amarillo", "descripcion": "Urgencia",
-                "tiempo": "<30 min"},
-            4: {"nivel_mts": 4, "color": "Verde", "descripcion": "Poco urgente",
-                "tiempo": "<60 min"},
-            5: {"nivel_mts": 5, "color": "Azul", "descripcion": "No urgente",
-                "tiempo": "<120 min"},
-        }
-        info = mapeo.get(nivel_motor, mapeo[5])
-        info["protocolo"] = "MTS"
-        info["organizacion"] = "Manchester Triage Group"
-        return info
+    def clasificar(nivel_motor, sintomas=None):
+        return protocolo_no_implementado("MTS", "nivel_mts")
 
 
 class ProtocoloCTAS:
-    """
-    Canadian Triage and Acuity Scale (CTAS)
-    Canadian Association of Emergency Physicians (CAEP)
-    
-    Niveles similares a ESI pero con especificaciones de tiempo diferentes.
-    """
-    nombre = "CTAS (Canadian Triage and Acuity Scale)"
-    version = "v5"
-    organizacion = "CAEP"
-
     @staticmethod
-    def clasificar(nivel_motor: int) -> dict:
-        mapeo = {
-            1: {"nivel_ctas": 1, "color": "Rojo", "resuscitation": True,
-                "tiempo": "Inmediato", "descripcion": "Reanimacion"},
-            2: {"nivel_ctas": 2, "color": "Naranja", "resuscitation": False,
-                "tiempo": "<15 min", "descripcion": "Emergencia"},
-            3: {"nivel_ctas": 3, "color": "Amarillo", "resuscitation": False,
-                "tiempo": "<30 min", "descripcion": "Urgencia"},
-            4: {"nivel_ctas": 4, "color": "Verde", "resuscitation": False,
-                "tiempo": "<60 min", "descripcion": "Poco urgente"},
-            5: {"nivel_ctas": 5, "color": "Azul", "resuscitation": False,
-                "tiempo": "<120 min", "descripcion": "No urgente"},
-        }
-        info = mapeo.get(nivel_motor, mapeo[5])
-        info["protocolo"] = "CTAS"
-        info["organizacion"] = "Canadian Association of Emergency Physicians"
-        return info
+    def clasificar(nivel_motor):
+        return protocolo_no_implementado("CTAS", "nivel_ctas")
 
 
 class ProtocoloATS:
-    """
-    Australasian Triage Scale (ATS)
-    Australasian College for Emergency Medicine (ACEM)
-    
-    Utilizado en Australia y Nueva Zelanda.
-    """
-    nombre = "ATS (Australasian Triage Scale)"
-    version = "2006"
-    organizacion = "ACEM"
-
     @staticmethod
-    def clasificar(nivel_motor: int) -> dict:
-        mapeo = {
-            1: {"nivel_ats": 1, "color": "Rojo", "tiempo": "Inmediato",
-                "descripcion": "Resuscitation"},
-            2: {"nivel_ats": 2, "color": "Naranja", "tiempo": "<10 min",
-                "descripcion": "Emergency"},
-            3: {"nivel_ats": 3, "color": "Amarillo", "tiempo": "<30 min",
-                "descripcion": "Urgent"},
-            4: {"nivel_ats": 4, "color": "Verde", "tiempo": "<60 min",
-                "descripcion": "Semi-urgent"},
-            5: {"nivel_ats": 5, "color": "Azul", "tiempo": "<120 min",
-                "descripcion": "Non-urgent"},
-        }
-        info = mapeo.get(nivel_motor, mapeo[5])
-        info["protocolo"] = "ATS"
-        info["organizacion"] = "Australasian College for Emergency Medicine"
-        return info
+    def clasificar(nivel_motor):
+        return protocolo_no_implementado("ATS", "nivel_ats")
 
 
 # =============================================================================
@@ -501,7 +416,7 @@ class MotorSoporteClinico:
             if excluido:
                 continue
 
-            # Calcular probabilidad con evidencia
+            # Calcular peso heurístico no calibrado con evidencia
             evidencia = []
             prob = patron["peso_base"]
 
@@ -524,15 +439,17 @@ class MotorSoporteClinico:
                 conducta=patron["conducta"]
             ))
 
-        # Ordenar por probabilidad
+        # Ordenar por peso heurístico no calibrado
         self.diagnosticos.sort(key=lambda d: d.probabilidad, reverse=True)
         return self.diagnosticos[:5]  # Top 5
 
     def clasificar_todos_los_protocolos(self, nivel_motor: int, sintomas: dict = None) -> dict:
         """
-        Clasifica al paciente en todos los protocolos de triaje disponibles.
+        Devuelve el nivel local y el estado no implementado de los protocolos oficiales.
         """
         return {
+            "local": {"nivel": nivel_motor, "estado": "prototipo_no_validado",
+                      "validacion_clinica": "pendiente"},
             "esi": ProtocoloESI.clasificar(nivel_motor),
             "mts": ProtocoloMTS.clasificar(nivel_motor, sintomas),
             "ctas": ProtocoloCTAS.clasificar(nivel_motor),
@@ -551,7 +468,7 @@ def obtener_soporte_clinico_completo(datos: dict, nivel_motor: int) -> dict:
     Returns:
         - diagnosticos: lista de diagnosticos diferenciales
         - score_riesgo: score multifactorizado
-        - protocolos: clasificacion en todos los protocolos
+        - protocolos: prioridad local y estado de implementación oficial
     """
     motor = MotorSoporteClinico()
     diagnosticos = motor.inferir_diagnosticos(datos)
@@ -571,6 +488,10 @@ def obtener_soporte_clinico_completo(datos: dict, nivel_motor: int) -> dict:
             }
             for d in diagnosticos
         ],
+        "alcance": {"validacion_clinica": "pendiente",
+                    "diagnosticos": "Patrones heurísticos; no constituyen diagnósticos confirmados",
+                    "probabilidad": "Campo heredado: peso heurístico no calibrado, no probabilidad clínica",
+                    "scores": "Indicadores auxiliares no validados; no determinan el nivel"},
         "score_riesgo": score,
         "protocolos": protocolos,
     }

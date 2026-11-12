@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Triaje Medico - ESI</title>
+    <title>Sistema de Triaje Medico</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -583,6 +583,14 @@
         .recom-box .result-row-label { color: #2563eb; }
         .recom-box .result-row-value { color: #1e40af; }
 
+        .scope-note { font-size: 0.75rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem; }
+        .reasoning { margin-top: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.625rem; }
+        .reasoning summary { cursor: pointer; font-size: 0.8125rem; font-weight: 600; }
+        .reasoning ol { padding-left: 1.25rem; margin-top: 0.75rem; }
+        .reasoning li, .reasoning p { font-size: 0.75rem; line-height: 1.6; overflow-wrap: anywhere; }
+        .reasoning li + li { margin-top: 0.5rem; }
+        .reasoning p { margin-top: 0.75rem; color: var(--text-secondary); }
+
         /* ===================== GAUGE DIAL (SVG) ===================== */
         .gauge-row {
             display: grid;
@@ -753,7 +761,7 @@
 <div class="top-bar">
     <div class="top-bar-left">
         <div class="logo-mark">T</div>
-        <span class="top-bar-title" data-i18n="app_title">Sistema de Triaje - ESI</span>
+        <span class="top-bar-title" data-i18n="app_title">Sistema de Triaje</span>
         <div class="status-pill"><div class="status-dot"></div><span data-i18n="online">Online</span></div>
     </div>
     <div style="display:flex;align-items:center">
@@ -772,6 +780,7 @@
     <div class="left-panel">
         <div class="panel-header"><h2 data-i18n="panel_title">Evaluacion de Paciente</h2></div>
         <div class="panel-body">
+            <p class="scope-note">Prototipo de apoyo con reglas locales; no validado clínicamente. Requiere valoración profesional y no equivale a ESI, MTS, CTAS o ATS oficiales.</p>
             <form id="triageForm" onsubmit="evaluar(event)">
                 <div class="field-group">
                     <label class="field-label" data-i18n="identificacion">Identificacion</label>
@@ -957,6 +966,12 @@
                         </div>
                     </div>
                 </div>
+                <details class="reasoning" id="reasoningDetails" hidden>
+                    <summary>Cómo se obtuvo esta prioridad</summary>
+                    <ol id="reasoningSteps"></ol>
+                    <p id="reasoningKnowledge"></p>
+                    <p>Los pesos de reglas y los indicadores de riesgo no son probabilidades clínicas calibradas.</p>
+                </details>
             </div>
 
             <!-- History -->
@@ -977,7 +992,7 @@ let LANG = localStorage.getItem('triaje_lang') || 'es';
 
 const I18N = {
   es: {
-    app_title: 'Sistema de Triaje - ESI',
+    app_title: 'Sistema de Triaje',
     online: 'Online',
     panel_title: 'Evaluacion de Paciente',
     identificacion: 'Identificacion',
@@ -1036,7 +1051,7 @@ const I18N = {
     err_net: 'No se pudo conectar con el servidor: {m}',
   },
   qu: {
-    app_title: 'Triaje Systema - ESI',
+    app_title: 'Triaje Systema',
     online: 'Sami',
     panel_title: "Ukuymanta Rikch'ay",
     identificacion: 'Sutiyachay',
@@ -1462,10 +1477,31 @@ function showResult(d, silent) {
         }));
     } else ar.style.display = 'none';
 
+    renderReasoning(d);
     if (!silent) {
+        lastResult = d;
         sec.classList.add('visible');
         transitionContent(sec);
     }
+}
+
+function renderReasoning(d) {
+    const details = document.getElementById('reasoningDetails');
+    const steps = document.getElementById('reasoningSteps');
+    const knowledge = document.getElementById('reasoningKnowledge');
+    const explanation = d.metadata_motor?.explicaciones;
+    const trace = explanation?.trace || [];
+    const active = trace.filter(step => step.activa);
+    details.hidden = active.length === 0;
+    steps.replaceChildren(...active.map(step => {
+        const item = document.createElement('li');
+        const evidence = (step.condiciones_evaluadas || []).map(c =>
+            `${c.hecho}: ${c.actual} (${c.operador} ${JSON.stringify(c.esperado)})`).join('; ');
+        item.textContent = `${step.regla_id}${step.decisiva ? ' · decisiva' : ''} · paso ${step.iteracion}: ${step.conclusion}${evidence ? ' — ' + evidence : ''}`;
+        return item;
+    }));
+    const source = explanation?.conocimiento;
+    knowledge.textContent = source ? `Base ${source.version} · SHA-256 ${source.sha256} · validación clínica pendiente` : '';
 }
 
 function pushHistory(d) {

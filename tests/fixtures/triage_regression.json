@@ -1,0 +1,1014 @@
+{
+  "tipo": "sintetico",
+  "referencia": "Regresión del motor local en commit 0a81337. No son etiquetas clínicas adjudicadas.",
+  "casos": [
+    {
+      "paciente": {
+        "id_paciente": "SYN-000",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-001",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 20,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-002",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 21,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-003",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 25,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-004",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 39,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-005",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 40,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-006",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 49,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-007",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 50,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-008",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 59,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-009",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 60,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-010",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 100,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-011",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 101,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-012",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 120,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-013",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 121,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-014",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 150,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-015",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 151,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-016",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 89,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-017",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 90,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-018",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 93,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-019",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 94,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-020",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 95,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-021",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 79,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-022",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 80,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-023",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 85,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-024",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 89,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-025",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 90,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-026",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 180,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-027",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 181,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-028",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 200,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-029",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 201,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-030",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 120,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-031",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 121,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-032",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 34.9
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-033",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 35
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-034",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 35.9
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-035",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-036",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-037",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38.1
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-038",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 39.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-039",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 39.6
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-040",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "dolor_toracico": true
+        }
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-041",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "dificultad_respiratoria": true
+        }
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-042",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "sangrado_activo": true
+        }
+      },
+      "nivel_referencia": 3
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-043",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "convulsiones": true
+        }
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-044",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "alteracion_conducta": true
+        }
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-045",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "trauma_significativo": true
+        }
+      },
+      "nivel_referencia": 5
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-046",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {
+          "dolor_intenso": true
+        }
+      },
+      "nivel_referencia": 3
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-047",
+        "edad": 35,
+        "nivel_conciencia": "Verbal",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 79,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-048",
+        "edad": 35,
+        "nivel_conciencia": "Verbal",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 80,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-049",
+        "edad": 35,
+        "nivel_conciencia": "Verbal",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-050",
+        "edad": 35,
+        "nivel_conciencia": "Dolor",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 79,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-051",
+        "edad": 35,
+        "nivel_conciencia": "Dolor",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 80,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-052",
+        "edad": 35,
+        "nivel_conciencia": "Dolor",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-053",
+        "edad": 35,
+        "nivel_conciencia": "Inconsciente",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 79,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-054",
+        "edad": 35,
+        "nivel_conciencia": "Inconsciente",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 80,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-055",
+        "edad": 35,
+        "nivel_conciencia": "Inconsciente",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 36.5
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 1
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-056",
+        "edad": 1,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-057",
+        "edad": 1,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38.1
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 2
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-058",
+        "edad": 2,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-059",
+        "edad": 2,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 75,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38.1
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 4
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-060",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 121,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38.1
+        },
+        "sintomas": {}
+      },
+      "nivel_referencia": 3
+    },
+    {
+      "paciente": {
+        "id_paciente": "SYN-061",
+        "edad": 35,
+        "nivel_conciencia": "Alerta",
+        "signos_vitales": {
+          "frecuencia_cardiaca": 121,
+          "saturacion_oxigeno": 98,
+          "presion_sistolica": 120,
+          "presion_diastolica": 80,
+          "temperatura": 38.1
+        },
+        "sintomas": {
+          "trauma_significativo": true
+        }
+      },
+      "nivel_referencia": 3
+    }
+  ]
+}
