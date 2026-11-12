@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Conocimiento · Sistema de Triaje</title>
+<style>
+:root{--bg-primary:#fff;--bg-secondary:#f8f9fa;--bg-input:#fff;--border:#e5e7eb;--border-hover:#d1d5db;--text-primary:#111827;--text-secondary:#6b7280;--text-muted:#9ca3af;--accent:#2563eb;--accent-glow:rgba(37,99,235,.12)}
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;background:var(--bg-primary);color:var(--text-primary);-webkit-font-smoothing:antialiased}button,input,textarea,select{font-family:inherit}a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.top-bar{height:48px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;position:sticky;top:0;z-index:20;background:#fff;gap:16px}.top-bar-left{display:flex;align-items:center;gap:1rem}.logo-mark{width:28px;height:28px;background:var(--accent);border-radius:6px;display:grid;place-items:center;font-weight:800;font-size:.75rem;color:#fff;flex-shrink:0}.top-bar-title{font-size:.8125rem;font-weight:600;letter-spacing:-.01em}.section-tag{font-size:.6875rem;color:var(--text-secondary);padding-left:1rem;border-left:1px solid var(--border)}.back-link{font-size:.75rem;display:flex;align-items:center;gap:7px;min-height:40px;white-space:nowrap}.back-link svg{width:14px;height:14px}
+.main-grid{display:grid;grid-template-columns:360px minmax(0,1fr);min-height:calc(100vh - 48px)}.left-panel{background:var(--bg-secondary);border-right:1px solid var(--border);display:flex;flex-direction:column}.panel-header{padding:1rem 1.25rem .75rem;border-bottom:1px solid var(--border)}.panel-header h1{font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}.panel-body{padding:1.25rem;flex:1}.intro{font-size:.75rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.5rem}.field-group{margin-bottom:1.25rem}.field-label{display:block;font-size:.6875rem;font-weight:500;color:var(--text-secondary);margin-bottom:.375rem}.field-input,.field-select{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:.375rem;padding:.625rem;color:var(--text-primary);font-size:.8125rem;outline:none;transition:border-color .15s,box-shadow .15s}.field-input:focus,.field-select:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}.field-input::placeholder{color:var(--text-muted)}textarea.field-input{min-height:120px;resize:vertical;line-height:1.6}.field-select{cursor:pointer}.field-help{font-size:.6875rem;color:var(--text-secondary);line-height:1.6;margin-top:.5rem}.section-divider{height:1px;background:var(--border);margin:1.25rem 0}.review-check{display:flex;align-items:flex-start;gap:.625rem;font-size:.75rem;color:var(--text-secondary);line-height:1.6;cursor:pointer}.review-check input{accent-color:var(--accent);margin-top:3px;flex-shrink:0;width:14px;height:14px}.panel-footer{padding:1rem 1.25rem;border-top:1px solid var(--border)}.btn-primary{width:100%;padding:.6875rem;background:var(--accent);color:#fff;border:none;border-radius:.375rem;font-size:.8125rem;font-weight:600;cursor:pointer;min-height:44px;transition:background .15s}.btn-primary:hover{background:#1d4ed8}button:disabled{opacity:.5;cursor:wait}.footer-hint{font-size:.6875rem;color:var(--text-secondary);line-height:1.6;text-align:center;margin-top:.625rem}
+.right-panel{padding:1.5rem;min-width:0}.page-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:1.5rem}.eyebrow{text-transform:uppercase;font-size:.625rem;font-weight:600;letter-spacing:.08em;color:var(--text-muted);margin-bottom:.5rem}.page-heading h2{font-size:1.25rem;font-weight:600;letter-spacing:-.025em}.subtitle{font-size:.75rem;color:var(--text-secondary);line-height:1.7;margin-top:.5rem;max-width:600px}.protected-pill{display:flex;align-items:center;gap:6px;font-size:.6875rem;white-space:nowrap;border:1px solid rgba(22,163,74,.2);color:#15803d;background:rgba(22,163,74,.06);padding:.375rem .625rem;border-radius:999px}.protected-pill svg{width:13px;height:13px}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem;margin-bottom:1.25rem}.stat-card{border:1px solid var(--border);border-radius:.5rem;padding:1rem}.stat-label{font-size:.625rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary)}.stat-value{font-size:1.625rem;font-weight:600;letter-spacing:-.04em;margin:.5rem 0 .25rem;font-variant-numeric:tabular-nums}.stat-caption{font-size:.6875rem;color:var(--text-secondary)}.notice{display:flex;gap:.75rem;border:1px solid var(--border);border-radius:.5rem;background:var(--bg-secondary);padding:1rem;margin-bottom:1.5rem}.notice svg{color:var(--accent);width:17px;height:17px;flex-shrink:0;margin-top:2px}.notice strong{font-size:.75rem;font-weight:600}.notice p{font-size:.75rem;line-height:1.7;color:var(--text-secondary);margin-top:.25rem}.catalog-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.875rem;border-bottom:1px solid var(--border);gap:12px}.catalog-header h2{font-size:.8125rem;font-weight:600}.catalog-meta{font-size:.6875rem;color:var(--text-secondary)}.item{padding:1rem 0;border-bottom:1px solid var(--border)}.item h3{font-size:.8125rem;font-weight:600;overflow-wrap:anywhere}.item p{font-size:.75rem;line-height:1.7;color:var(--text-secondary);margin:.5rem 0;overflow-wrap:anywhere}.badge{display:inline-flex;align-items:center;font-size:.625rem;font-weight:500;padding:.25rem .5rem;border-radius:4px;margin-top:.5rem;background:#f3f4f6;color:var(--text-secondary)}.badge[data-active="true"]{color:#15803d;background:rgba(22,163,74,.08)}.badge[data-level="2"]{border-left:2px solid #ea580c}.badge[data-level="3"]{border-left:2px solid #d97706}.badge[data-level="4"]{border-left:2px solid #16a34a}.secondary{background:#fff;color:var(--text-secondary);font-size:.6875rem;border:1px solid var(--border);border-radius:.375rem;padding:.5rem .625rem;cursor:pointer;min-height:36px}.secondary:hover{border-color:var(--border-hover);color:var(--text-primary);background:var(--bg-secondary)}.empty-state{text-align:center;padding:3rem 1rem;border-bottom:1px solid var(--border)}.empty-icon{display:grid;place-items:center;width:44px;height:44px;border:1px solid var(--border);border-radius:10px;margin:0 auto 1rem;color:var(--text-muted)}.empty-icon svg{width:21px;height:21px}.empty-state strong{display:block;font-size:.8125rem;font-weight:500}.empty-state p{font-size:.75rem;color:var(--text-secondary);line-height:1.7;max-width:330px;margin:.5rem auto 0}.catalog-footer{font-size:.6875rem;color:var(--text-secondary);line-height:1.7;margin-top:1rem}#status:empty{display:none}#status{font-size:.75rem;border:1px solid var(--border);padding:.75rem;border-radius:.375rem;line-height:1.6;white-space:pre-line;margin-top:1rem}#status.error{color:#b91c1c;border-color:#fecaca;background:#fef2f2}#status.ok{color:#15803d;border-color:#bbf7d0;background:#f0fdf4}a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@keyframes entrance{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.panel-body,.right-panel{animation:entrance 280ms ease both}.right-panel{animation-delay:40ms}@media(max-width:1100px){.main-grid{grid-template-columns:320px minmax(0,1fr)}.right-panel{padding:1.25rem}.page-heading{flex-wrap:wrap}}@media(max-width:760px){.main-grid{grid-template-columns:1fr}.left-panel{border-right:0;border-bottom:1px solid var(--border)}.panel-body{padding:1.25rem}.right-panel{padding:1.25rem}.section-tag{display:none}.top-bar{padding:0 .75rem}.top-bar-left{gap:.5rem}.top-bar-title{font-size:.75rem}.summary{gap:.5rem}.stat-card{padding:.75rem}.stat-label{font-size:.5625rem}.stat-caption{line-height:1.6}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style></head>
+<body>
+<header class="top-bar"><div class="top-bar-left"><div class="logo-mark">T</div><span class="top-bar-title">Sistema de Triaje</span><span class="section-tag">Conocimiento</span></div><a class="back-link" href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="m14 6-6 6 6 6"/></svg>Evaluar paciente</a></header>
+<main class="main-grid">
+<section class="left-panel" aria-labelledby="createTitle"><div class="panel-header"><h1 id="createTitle">Añadir síntoma</h1></div><div class="panel-body"><p class="intro">Amplíe el catálogo con un síntoma y su regla de presencia. Los criterios originales del sistema permanecen protegidos.</p>
+<section style="border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:18px">
+<p id="accessState" class="field-help">Comprobando acceso…</p>
+<form id="loginForm"><label class="field-label" for="adminUser">Usuario administrador</label><input class="field-input" id="adminUser" value="administrador" autocomplete="username" required>
+<label class="field-label" for="adminPassword" style="margin-top:8px">Clave</label><input class="field-input" id="adminPassword" type="password" autocomplete="current-password" required>
+<button type="submit" class="btn-primary" style="margin-top:10px">Iniciar sesión</button><p class="field-help">Consulte acceso-local.txt en la carpeta del proyecto.</p></form>
+<button id="logout" class="secondary" type="button" hidden>Cerrar sesión</button></section>
+<form id="createForm"><div class="field-group"><label class="field-label" for="name">Nombre del síntoma</label><input class="field-input" id="name" required minlength="3" maxlength="100" autocomplete="off" placeholder="Nombre para el catálogo"></div>
+<div class="field-group"><label class="field-label" for="description">Justificación de la regla</label><textarea class="field-input" id="description" required minlength="10" maxlength="500" placeholder="Describa por qué su presencia requiere la prioridad elegida." aria-describedby="descriptionHelp"></textarea><p class="field-help" id="descriptionHelp">Esta justificación aparecerá en la explicación del motor.</p></div>
+<div class="field-group"><label class="field-label" for="level">Prioridad propuesta</label><select class="field-select" id="level" required aria-describedby="levelHelp"><option value="">Seleccionar prioridad…</option><option value="2">2 · Naranja</option><option value="3">3 · Amarillo</option><option value="4">4 · Verde</option></select><p class="field-help" id="levelHelp">Se propone únicamente cuando el síntoma está presente. El motor conserva siempre la prioridad más urgente.</p></div>
+<div class="section-divider"></div><label class="review-check"><input type="checkbox" required><span>He revisado la justificación y la prioridad propuesta.</span></label></form>
+<div id="status" role="status" aria-live="polite"></div></div>
+<div class="panel-footer"><button class="btn-primary" id="save" type="submit" form="createForm">Guardar borrador</button><p class="footer-hint">Primero guarde y pruebe el borrador; publíquelo después de revisarlo.</p></div></section>
+<section class="right-panel" aria-labelledby="knowledgeTitle"><div class="page-heading"><div><p class="eyebrow">Gestión del conocimiento</p><h2 id="knowledgeTitle">Síntomas adicionales</h2><p class="subtitle">Nuevos conocimientos para el motor, con un alcance de edición controlado.</p></div><span class="protected-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>Reglas base protegidas</span></div>
+<div class="summary"><div class="stat-card"><div class="stat-label">Ampliaciones</div><div class="stat-value" id="totalCount">—</div><div class="stat-caption">Síntomas registrados</div></div><div class="stat-card"><div class="stat-label">Activas</div><div class="stat-value" id="activeCount">—</div><div class="stat-caption">Disponibles al evaluar</div></div><div class="stat-card"><div class="stat-label">Borradores</div><div class="stat-value" id="draftCount">—</div><div class="stat-caption">Pendientes de publicación</div></div></div>
+<div class="notice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></svg><div><strong>Una ampliación, una regla de presencia</strong><p>Puede añadir síntomas con prioridad 2, 3 o 4 y desactivar sus ampliaciones. Las reglas originales, los umbrales, los colores y las recomendaciones no se editan desde aquí.</p></div></div>
+<div class="catalog-header"><h2>Catálogo de ampliaciones</h2><span class="catalog-meta">Gestión local</span></div><div id="list" aria-live="polite">Cargando catálogo…</div><p class="catalog-footer">«No evaluado» no activa una regla. Las evaluaciones anteriores conservan su versión del conocimiento. Los textos nuevos se muestran en español y requieren revisión clínica.</p></section></main>
+<script>
+if (typeof location !== 'undefined' && (location.protocol === 'file:' ||
+    (['localhost', '127.0.0.1'].includes(location.hostname) && ['', '80'].includes(location.port)))) {
+    location.replace('http://localhost:8000/conocimiento');
+}
+const statusNode=document.getElementById('status');
+let adminAccess=false;
+async function refreshSession(){
+ const response=await fetch('/conocimiento/sesion',{cache:'no-store'});if(!response.ok)throw new Error('No se pudo comprobar la sesión.');
+ const user=await response.json();adminAccess=user.rol==='administrador';
+ document.getElementById('accessState').textContent=adminAccess?'Administrador: '+user.usuario:'Modo operador: catálogo de solo lectura.';
+ document.getElementById('loginForm').hidden=adminAccess;document.getElementById('logout').hidden=!adminAccess;
+ document.querySelectorAll('#createForm input,#createForm select,#createForm textarea').forEach(el=>el.disabled=!adminAccess);
+ document.getElementById('save').disabled=!adminAccess;
+}
+document.getElementById('loginForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=event.currentTarget.querySelector('button');button.disabled=true;
+ try{await api('/conocimiento/sesion',{method:'POST',body:JSON.stringify({usuario:document.getElementById('adminUser').value,clave:document.getElementById('adminPassword').value})});
+ document.getElementById('adminPassword').value='';await refreshSession();await load();statusMessage('Sesión de administrador iniciada.');
+ }catch(error){statusMessage(error.message,true);}finally{button.disabled=false;}
+});
+document.getElementById('logout').addEventListener('click',async()=>{
+ try{await api('/conocimiento/sesion',{method:'DELETE'});await refreshSession();await load();statusMessage('Sesión cerrada.');}catch(error){statusMessage(error.message,true);}
+});
+function statusMessage(message,error=false){statusNode.textContent=message;statusNode.className=error?'error':'ok';}
+async function api(path,options={}){
+ const response=await fetch(path,{...options,headers:{'Content-Type':'application/json','X-Triaje-Gestion':'1',...options.headers}});
+ const result=await response.json();
+ if(!response.ok)throw new Error(Array.isArray(result.detail)?result.detail.map(e=>e.msg).join('; '):(result.detail||'No se pudo completar la solicitud.'));
+ return result;
+}
+async function load(){
+ const data=await api('/conocimiento/sintomas');const list=document.getElementById('list');list.replaceChildren();
+ document.getElementById('totalCount').textContent=data.sintomas.length;
+ document.getElementById('activeCount').textContent=data.sintomas.filter(s=>s.activo).length;
+ document.getElementById('draftCount').textContent=data.sintomas.filter(s=>s.estado==='borrador').length;
+ if(!data.sintomas.length){list.innerHTML='<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M8 12h8m-4-4v8"/></svg></div><strong>Su catálogo empieza aquí</strong><p>Añada un síntoma desde el formulario. Aparecerá en la evaluación junto a su regla de presencia.</p></div>';return;}
+ for(const symptom of data.sintomas){
+  const item=document.createElement('article');item.className='item';
+  const title=document.createElement('h3');title.textContent=symptom.nombre;
+  const badge=document.createElement('span');badge.className='badge';badge.dataset.active=String(symptom.activo);badge.dataset.level=String(symptom.nivel);badge.textContent=(symptom.estado==='borrador'?'Borrador':symptom.activo?'Publicado':'Desactivado')+' · Prioridad '+symptom.nivel;
+  const description=document.createElement('p');description.textContent=symptom.descripcion;
+  item.append(title,badge,description);
+  if(adminAccess && symptom.estado==='borrador') {
+   const trial=document.createElement('button');trial.className='secondary';trial.textContent='Probar borrador';trial.type='button';
+   trial.addEventListener('click',async()=>{trial.disabled=true;try{const result=await api('/conocimiento/sintomas/'+encodeURIComponent(symptom.id)+'/ensayo',{method:'POST'});
+    await load();statusMessage('Ensayo sintético de «'+symptom.nombre+'»: '+result.resultados.map(r=>(r.presencia===null?'No evaluado':r.presencia?'Presente':'Ausente')+' → prioridad '+r.nivel).join('; ')+'. No constituye validación clínica.');
+   }catch(error){statusMessage(error.message,true);}finally{trial.disabled=false;}});item.append(trial);
+   const publish=document.createElement('button');publish.className='secondary';publish.textContent='Publicar regla';publish.type='button';publish.disabled=!symptom.ensayado;publish.title=symptom.ensayado?'Publicar regla revisada':'Primero pruebe el borrador';publish.style.marginLeft='8px';
+   publish.addEventListener('click',async()=>{if(!confirm('¿Publicar la regla de «'+symptom.nombre+'» para las próximas evaluaciones?'))return;publish.disabled=true;
+    try{await api('/conocimiento/sintomas/'+encodeURIComponent(symptom.id)+'/publicar',{method:'POST'});await load();statusMessage('Regla publicada. Actualice el catálogo de evaluación.');}catch(error){statusMessage(error.message,true);publish.disabled=false;}
+   });item.append(publish);
+  }
+  if(adminAccess && symptom.activo){const button=document.createElement('button');button.className='secondary';button.textContent='Desactivar ampliación';button.type='button';button.addEventListener('click',async()=>{
+   if(!confirm('¿Desactivar «'+symptom.nombre+'» para las próximas evaluaciones?'))return;
+   button.disabled=true;try{await api('/conocimiento/sintomas/'+encodeURIComponent(symptom.id)+'/desactivar',{method:'POST'});await load();statusMessage('Ampliación desactivada. Las evaluaciones históricas se conservan.');}catch(error){statusMessage(error.message,true);button.disabled=false;}
+  });item.append(button);}list.append(item);
+ }
+}
+document.getElementById('createForm').addEventListener('submit',async event=>{
+ event.preventDefault();const button=document.getElementById('save');button.disabled=true;
+ try{const result=await api('/conocimiento/sintomas',{method:'POST',body:JSON.stringify({nombre:document.getElementById('name').value.trim(),descripcion:document.getElementById('description').value.trim(),nivel:Number(document.getElementById('level').value)})});
+ document.getElementById('createForm').reset();await load();statusMessage('Borrador «'+result.nombre+'» guardado. Pruébelo y publíquelo después de revisarlo.');
+ }catch(error){statusMessage(error.message,true);}finally{button.disabled=!adminAccess;}
+});
+refreshSession().then(load).catch(error=>{document.getElementById('list').textContent='No se pudo cargar el catálogo.';statusMessage(error.message,true);});
+</script></body></html>

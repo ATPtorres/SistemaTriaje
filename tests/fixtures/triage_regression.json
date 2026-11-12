@@ -14,7 +14,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -30,7 +38,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -46,7 +62,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -62,7 +86,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -78,7 +110,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -94,7 +134,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -110,7 +158,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -126,7 +182,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -142,7 +206,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -158,7 +230,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -174,7 +254,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -190,7 +278,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -206,7 +302,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -222,7 +326,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -238,7 +350,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -254,7 +374,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -270,7 +398,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -286,7 +422,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -302,7 +446,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -318,7 +470,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -334,7 +494,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -350,7 +518,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -366,7 +542,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -382,7 +566,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -398,7 +590,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -414,7 +614,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -430,7 +638,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -446,7 +662,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -462,7 +686,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -478,7 +710,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -494,7 +734,15 @@
           "presion_diastolica": 120,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -510,7 +758,15 @@
           "presion_diastolica": 121,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -526,7 +782,15 @@
           "presion_diastolica": 80,
           "temperatura": 34.9
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -542,7 +806,15 @@
           "presion_diastolica": 80,
           "temperatura": 35
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -558,7 +830,15 @@
           "presion_diastolica": 80,
           "temperatura": 35.9
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -574,7 +854,15 @@
           "presion_diastolica": 80,
           "temperatura": 36
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -590,7 +878,15 @@
           "presion_diastolica": 80,
           "temperatura": 38
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -606,7 +902,15 @@
           "presion_diastolica": 80,
           "temperatura": 38.1
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -622,7 +926,15 @@
           "presion_diastolica": 80,
           "temperatura": 39.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -638,7 +950,15 @@
           "presion_diastolica": 80,
           "temperatura": 39.6
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 5
     },
@@ -655,7 +975,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "dolor_toracico": true
+          "dolor_toracico": true,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 2
@@ -673,7 +999,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "dificultad_respiratoria": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": true,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 4
@@ -691,7 +1023,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "sangrado_activo": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": true,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 3
@@ -709,7 +1047,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "convulsiones": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": true,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 1
@@ -727,7 +1071,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "alteracion_conducta": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": true,
+          "trauma_significativo": false,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 5
@@ -745,7 +1095,13 @@
           "temperatura": 36.5
         },
         "sintomas": {
-          "trauma_significativo": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": true,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 5
@@ -763,6 +1119,12 @@
           "temperatura": 36.5
         },
         "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
           "dolor_intenso": true
         }
       },
@@ -780,7 +1142,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -796,7 +1166,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -812,7 +1190,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -828,7 +1214,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -844,7 +1238,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -860,7 +1262,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -876,7 +1286,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -892,7 +1310,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -908,7 +1334,15 @@
           "presion_diastolica": 80,
           "temperatura": 36.5
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 1
     },
@@ -924,7 +1358,15 @@
           "presion_diastolica": 80,
           "temperatura": 38
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -940,7 +1382,15 @@
           "presion_diastolica": 80,
           "temperatura": 38.1
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 2
     },
@@ -956,7 +1406,15 @@
           "presion_diastolica": 80,
           "temperatura": 38
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -972,7 +1430,15 @@
           "presion_diastolica": 80,
           "temperatura": 38.1
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 4
     },
@@ -988,7 +1454,15 @@
           "presion_diastolica": 80,
           "temperatura": 38.1
         },
-        "sintomas": {}
+        "sintomas": {
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": false,
+          "dolor_intenso": false
+        }
       },
       "nivel_referencia": 3
     },
@@ -1005,7 +1479,13 @@
           "temperatura": 38.1
         },
         "sintomas": {
-          "trauma_significativo": true
+          "dolor_toracico": false,
+          "dificultad_respiratoria": false,
+          "sangrado_activo": false,
+          "convulsiones": false,
+          "alteracion_conducta": false,
+          "trauma_significativo": true,
+          "dolor_intenso": false
         }
       },
       "nivel_referencia": 3

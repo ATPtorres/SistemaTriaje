@@ -17,7 +17,7 @@ from pydantic import (BaseModel, ConfigDict, Field, StrictBool, StrictFloat,
                       StrictInt, StrictStr, model_validator)
 from models import DatosPaciente
 
-ENGINE_VERSION = '4.0.0'
+ENGINE_VERSION = '4.2.0'
 DEFAULT_KNOWLEDGE_PATH = Path(__file__).parent / 'knowledge' / 'triage_rules.json'
 INPUT_TYPES = {**dict.fromkeys(('fc', 'spo2', 'pas', 'pad', 'temp', 'edad'), 'number'),
                'conciencia': 'string', **dict.fromkeys((
@@ -91,9 +91,15 @@ class ConfiguracionConocimiento(StrictModel):
     salidas: dict[str, Salida]
     respaldo: ReglaProduccion
     reglas: list[ReglaProduccion] = Field(min_length=1)
+    entradas_adicionales: list[str] = Field(default_factory=list, max_length=100)
 
     @model_validator(mode='after')
     def validate_graph(self):
+        import re
+        if (len(set(self.entradas_adicionales)) != len(self.entradas_adicionales) or
+                any(not re.fullmatch(r'sx_[a-f0-9]{32}', name) for name in self.entradas_adicionales)):
+            raise ValueError('Entradas adicionales inválidas')
+        input_types = {**INPUT_TYPES, **dict.fromkeys(self.entradas_adicionales, 'bool')}
         all_rules = [*self.reglas, self.respaldo]
         ids = [r.id for r in all_rules]
         if len(ids) != len(set(ids)):
@@ -104,14 +110,14 @@ class ConfiguracionConocimiento(StrictModel):
                 self.respaldo.efectos or not self.respaldo.activa):
             raise ValueError('El respaldo debe ser explícito, activo y de nivel 5')
         effects = {f for r in self.reglas for f in r.efectos}
-        if effects & (set(INPUT_TYPES) | set(self.agregaciones)):
+        if effects & (set(input_types) | set(self.agregaciones)):
             raise ValueError('Los efectos no pueden sobrescribir entradas o agregaciones')
-        if set(self.agregaciones) & set(INPUT_TYPES):
+        if set(self.agregaciones) & set(input_types):
             raise ValueError('Las agregaciones no pueden sobrescribir entradas')
         for name, sources in self.agregaciones.items():
             if not sources or len(sources) != len(set(sources)) or not set(sources) <= effects:
                 raise ValueError(f'Fuentes de agregación inválidas: {name}')
-        types = {**INPUT_TYPES, **dict.fromkeys(effects, 'derived'),
+        types = {**input_types, **dict.fromkeys(effects, 'derived'),
                  **dict.fromkeys(self.agregaciones, 'count')}
         for rule in self.reglas:
             if not rule.condiciones:
@@ -133,6 +139,36 @@ class ConfiguracionConocimiento(StrictModel):
                 elif (c.operador == 'in' and not isinstance(c.valor, list)) or (
                         c.operador != 'in' and (not isinstance(c.valor, str) or c.operador not in ('==', '!='))):
                     raise ValueError(f'Condición textual inválida: {c.hecho}')
+            domains = {'fc': (20, 300), 'spo2': (0, 100), 'pas': (40, 300),
+                       'pad': (20, 200), 'temp': (30, 45), 'edad': (0, 150)}
+            for fact in {c.hecho for c in rule.condiciones}:
+                conditions = [c for c in rule.condiciones if c.hecho == fact]
+                kind = types[fact]
+                if kind in ('bool', 'derived'):
+                    candidates = [True] if kind == 'derived' else [False, True]
+                elif fact == 'conciencia':
+                    candidates = ['Alerta', 'Verbal', 'Dolor', 'Inconsciente']
+                else:
+                    lower, upper = domains.get(fact, (0, len(self.agregaciones.get(fact, []))))
+                    points = sorted({lower, upper, *(c.valor for c in conditions)})
+                    candidates = [p for p in points if lower <= p <= upper]
+                    candidates += [(a + b) / 2 for a, b in zip(points, points[1:]) if lower <= (a + b) / 2 <= upper]
+                    if fact != 'temp':
+                        import math
+                        candidates = list({q for p in candidates for q in (math.floor(p), math.ceil(p)) if lower <= q <= upper})
+                if not any(all(OPERATORS[c.operador](value, c.valor) for c in conditions) for value in candidates):
+                    raise ValueError(f'Condiciones imposibles en {rule.id}: {fact}')
+        reachable = set(input_types) | set(self.agregaciones)
+        pending = [r for r in self.reglas if r.activa]
+        while True:
+            enabled = [r for r in pending if all(c.hecho in reachable for c in r.condiciones)]
+            if not enabled:
+                break
+            for rule in enabled:
+                reachable.update(rule.efectos)
+                pending.remove(rule)
+        if pending:
+            raise ValueError('Reglas sin cadena de entrada alcanzable: ' + ', '.join(r.id for r in pending))
         return self
 
 
@@ -157,11 +193,15 @@ def _unique_object(pairs):
 
 
 class BaseConocimiento:
-    def __init__(self, path: str | Path | None = None):
+    def __init__(self, path: str | Path | None = None, *, ampliaciones=None):
         location = Path(path or os.getenv('TRIAGE_KNOWLEDGE_PATH') or DEFAULT_KNOWLEDGE_PATH)
         try:
             raw = location.read_bytes()
             data = json.loads(raw, object_pairs_hook=_unique_object)
+            if ampliaciones:
+                # Only the server builds these rules; base data is never rewritten.
+                from symptom_extensions import integrar_ampliaciones
+                data = integrar_ampliaciones(data, ampliaciones)
             self.config = ConfiguracionConocimiento.model_validate(data)
         except (OSError, ValueError) as exc:
             raise KnowledgeConfigurationError('Base de conocimiento ausente o inválida') from exc
@@ -188,7 +228,11 @@ class BaseConocimiento:
             sv['frecuencia_cardiaca'], sv['saturacion_oxigeno'], sv['presion_sistolica'],
             sv['presion_diastolica'], sv['temperatura'])))
         self.hechos_entrada.update(edad=patient['edad'], conciencia=patient['nivel_conciencia'])
-        self.hechos_entrada.update(patient['sintomas'])
+        self.hechos_entrada.update({k: v for k, v in patient['sintomas'].items() if v is not None})
+        additional = patient['sintomas_adicionales']
+        if not set(additional) <= set(self.config.entradas_adicionales):
+            raise ValueError('Síntomas adicionales desconocidos o desactivados; actualice el catálogo')
+        self.hechos_entrada.update({key: value for key, value in additional.items() if value is not None})
         self.hechos_paciente = dict(self.hechos_entrada)
 
     def forward_chaining(self):
@@ -225,6 +269,9 @@ class BaseConocimiento:
                     if name not in facts:
                         facts[name] = True
                         provenance[name] = {'reglas': [rule.id], 'confianza': confidence}
+                    else:
+                        provenance[name]['reglas'] = sorted(set(provenance[name]['reglas']) | {rule.id})
+                        provenance[name]['confianza'] = max(provenance[name]['confianza'], confidence)
                 changed = True
             if not changed:
                 break

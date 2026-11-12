@@ -65,7 +65,8 @@ def get_db():
 
 def init_db():
     """Inicializa la base de datos creando todas las tablas definidas."""
-    Base.metadata.create_all(bind=engine)
+    from migrations import upgrade
+    upgrade(engine)
 
 
 def drop_all_tables():

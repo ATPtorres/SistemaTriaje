@@ -18,3 +18,4 @@ node_modules/
 pytest-cache-files-*/
 # Proyecto independiente, ajeno al sistema de triaje.
 /control-acceso/
+acceso-local.txt

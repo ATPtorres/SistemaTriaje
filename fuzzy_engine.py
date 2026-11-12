@@ -33,10 +33,10 @@ def trimf(x: float, params: tuple[float, float, float]) -> float:
     Retorna valor de pertenencia en [0, 1]
     """
     a, b, c = params
-    if x <= a or x >= c:
-        return 0.0
     if x == b:
         return 1.0
+    if x < a or x > c:
+        return 0.0
     if x < b:
         return (x - a) / (b - a) if b != a else 0.0
     return (c - x) / (c - b) if c != b else 0.0
@@ -51,7 +51,7 @@ def trapmf(x: float, params: tuple[float, float, float, float]) -> float:
     - b, c: puntos donde la pertenencia es 1
     """
     a, b, c, d = params
-    if x <= a or x >= d:
+    if x < a or x > d:
         return 0.0
     if b <= x <= c:
         return 1.0
@@ -175,58 +175,36 @@ class MotorDifuso:
             if not regla.activa:
                 continue
 
-            fuerzas = []
-            for var_name, conjunto in regla.antecedentes:
-                if var_name in grados_pertenencia:
-                    fuerza = grados_pertenencia[var_name].get(conjunto, 0.0)
-                    fuerzas.append(fuerza)
-
+            fuerzas = [grados_pertenencia.get(variable, {}).get(conjunto, 0.0)
+                       for variable, conjunto in regla.antecedentes]
             if fuerzas:
-                fuerza_regla = min(fuerzas) * regla.peso
-                resultados.append((regla, fuerza_regla))
+                resultados.append((regla, min(fuerzas) * regla.peso))
 
         return resultados
 
-    def defuzzificar(self, fuerzas_reglas: list[tuple[ReglaDifusa, float]]) -> float:
-        """
-        Paso 4: Defuzzificacion por metodo del centroide.
-        """
-        if not self.variable_salida or not fuerzas_reglas:
-            return 0.0
+    def defuzzificar(self, fuerzas_reglas) -> float | None:
+        """Centroid of aggregated output; no evidence never becomes a score."""
+        if not self.variable_salida:
+            return None
+        heights = {}
+        for rule, strength in fuerzas_reglas:
+            output, term = rule.consecuente
+            if output == self.variable_salida.nombre and strength > 0:
+                heights[term] = max(heights.get(term, 0), strength)
+        if not heights:
+            return None
+        lower, upper = self.variable_salida.rango
+        numerator = denominator = 0.0
+        for i in range(201):
+            x = lower + i * (upper - lower) / 200
+            memberships = self.variable_salida.evaluar(x)
+            aggregate = max(min(memberships.get(term, 0), height)
+                            for term, height in heights.items())
+            numerator += x * aggregate
+            denominator += aggregate
+        return numerator / denominator if denominator else None
 
-        # Muestrear el rango de salida
-        min_salida, max_salida = self.variable_salida.rango
-        n_puntos = 200
-        paso = (max_salida - min_salida) / n_puntos
-
-        numerador = 0.0
-        denominador = 0.0
-
-        for i in range(n_puntos + 1):
-            x = min_salida + i * paso
-
-            # Agregar contribucion de cada regla
-            valor_agregado = 0.0
-            for regla, fuerza in fuerzas_reglas:
-                var_sal, conj_sal = regla.consecuente
-                if self.variable_salida and var_sal == self.variable_salida.nombre:
-                    pertenencia = self.variable_salida.evaluar(x).get(conj_sal, 0.0)
-                    valor_agregado = max(valor_agregado, min(pertenencia, fuerza))
-
-            numerador += x * valor_agregado
-            denominador += valor_agregado
-
-        if denominador == 0:
-            # Si no hay area, usar ponderacion simple
-            suma_ponderada = sum(f * self.variable_salida.rango[0] for _, f in fuerzas_reglas)
-            suma_pesos = sum(f for _, f in fuerzas_reglas)
-            if suma_pesos > 0:
-                return suma_ponderada / suma_pesos + (max_salida - min_salida) / 2
-            return (min_salida + max_salida) / 2
-
-        return numerador / denominador
-
-    def inferir(self, entradas: dict[str, float]) -> tuple[float, dict]:
+    def inferir(self, entradas: dict[str, float]) -> tuple[float | None, dict]:
         """
         Metodo principal: ejecuta el pipeline completo de inferencia.
         
@@ -235,15 +213,24 @@ class MotorDifuso:
         - metadata: informacion detallada del proceso
         """
         # Paso 1: Fuzzificacion
-        grados = self.fuzzificar(entradas)
+        missing = sorted(set(self.variables_entrada) - set(entradas))
+        outside = sorted(name for name, value in entradas.items()
+                         if name in self.variables_entrada and
+                         (not math.isfinite(value) or not
+                          self.variables_entrada[name].rango[0] <= value <= self.variables_entrada[name].rango[1]))
+        grados = self.fuzzificar(entradas) if not outside else {}
 
         # Paso 2: Evaluacion de reglas
         fuerzas = self.evaluar_reglas(grados)
 
         # Paso 3: Defuzzificacion
-        resultado = self.defuzzificar(fuerzas)
+        resultado = self.defuzzificar(fuerzas) if not missing and not outside else None
 
         metadata = {
+            "estado": "calculado" if resultado is not None else "sin_resultado",
+            "motivo": ("entradas_faltantes" if missing else "fuera_de_rango" if outside else
+                       "sin_reglas_activas" if resultado is None else None),
+            "entradas_faltantes": missing, "entradas_fuera_de_rango": outside,
             "grados_pertenencia": grados,
             "fuerzas_reglas": [(r.id, r.descripcion, f) for r, f in fuerzas],
             "num_reglas_activas": len([f for _, f in fuerzas if f > 0]),
@@ -431,7 +418,7 @@ def crear_sistema_difuso_triaje() -> MotorDifuso:
 # FUNCION PUBLICA
 # =============================================================================
 
-def calcular_score_riesgo_difuso(fc: int, spo2: int, pas: int, temp: float, edad: int) -> tuple[float, dict]:
+def calcular_score_riesgo_difuso(fc: int, spo2: int, pas: int, temp: float, edad: int) -> tuple[float | None, dict]:
     """
     Calcula el score de riesgo difuso para un paciente.
     

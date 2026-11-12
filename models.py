@@ -7,7 +7,7 @@ Prioridades locales de cinco niveles; no equivalen a un protocolo oficial valida
 
 from enum import Enum
 from typing import Literal
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, StrictBool
 from typing import Annotated
 
 IdentificadorPaciente = Annotated[
@@ -109,32 +109,32 @@ class Sintomas(BaseModel):
     Síntomas clave reportados o detectados en el paciente.
     Cada campo es booleano para facilitar la evaluación por reglas.
     """
-    dolor_toracico: bool = Field(
-        default=False,
+    dolor_toracico: StrictBool | None = Field(
+        default=None,
         description="Dolor o malestar en el pecho"
     )
-    dificultad_respiratoria: bool = Field(
-        default=False,
+    dificultad_respiratoria: StrictBool | None = Field(
+        default=None,
         description="Disnea o dificultad para respirar"
     )
-    sangrado_activo: bool = Field(
-        default=False,
+    sangrado_activo: StrictBool | None = Field(
+        default=None,
         description="Hemorragia activa visible"
     )
-    convulsiones: bool = Field(
-        default=False,
+    convulsiones: StrictBool | None = Field(
+        default=None,
         description="Actividad convulsiva actual o reciente"
     )
-    alteracion_conducta: bool = Field(
-        default=False,
+    alteracion_conducta: StrictBool | None = Field(
+        default=None,
         description="Comportamiento inusual, agitación o confusión"
     )
-    trauma_significativo: bool = Field(
-        default=False,
+    trauma_significativo: StrictBool | None = Field(
+        default=None,
         description="Lesión por mecanismo de alto impacto (accidente, caída alta)"
     )
-    dolor_intenso: bool = Field(
-        default=False,
+    dolor_intenso: StrictBool | None = Field(
+        default=None,
         description="Dolor severo reportado (EVA >= 7)"
     )
 
@@ -172,6 +172,11 @@ class DatosPaciente(BaseModel):
     sintomas: Sintomas = Field(
         default_factory=Sintomas,
         description="Síntomas clave del paciente"
+    )
+    id_solicitud: str | None = Field(default=None, pattern=r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$')
+    sintomas_adicionales: dict[Annotated[str, StringConstraints(pattern=r'^sx_[a-f0-9]{32}$')], StrictBool | None] = Field(
+        default_factory=dict, max_length=100,
+        description="Síntomas del catálogo ampliable: true, false o null (no evaluado)"
     )
     idioma: Literal["es", "qu"] = Field(
         default="es",

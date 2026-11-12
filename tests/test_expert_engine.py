@@ -147,3 +147,85 @@ def test_reference_metrics_distinguish_under_and_overtriage():
         ReferenceDataset.model_validate({**data, 'tipo': 'adjudicado'})
     with pytest.raises(ValidationError):
         ReferenceDataset.model_validate({**data, 'casos': []})
+
+
+@pytest.mark.parametrize('rule_id,vitals,symptoms,other', [
+    ('R006', {'presion_sistolica': 89}, {'sangrado_activo': True}, {}),
+    ('R012', {'saturacion_oxigeno': 93}, {'dificultad_respiratoria': True}, {}),
+    ('R013', {'frecuencia_cardiaca': 121}, {'dificultad_respiratoria': True}, {}),
+    ('R015', {'frecuencia_cardiaca': 49}, {}, {'nivel_conciencia': 'Verbal'}),
+    ('R017', {'temperatura': 39.6}, {}, {'nivel_conciencia': 'Verbal'}),
+    ('R021', {}, {'dificultad_respiratoria': True}, {'edad': 1}),
+    ('R034', {'temperatura': 38.1}, {'alteracion_conducta': True}, {}),
+])
+def test_previously_uncovered_rules_fire(rule_id, vitals, symptoms, other):
+    patient = normal_patient(sintomas=symptoms, **other)
+    for name, value in vitals.items():
+        setattr(patient.signos_vitales, name, value)
+    result = evaluar_triaje(patient)
+    step = next(s for s in result.metadata_motor['traza_completa'] if s['regla_id'] == rule_id)
+    assert step['activa']
+    assert all(c['cumple'] for c in step['condiciones_evaluadas'])
+
+
+def test_unknown_symptoms_are_not_recorded_as_absent():
+    patient = normal_patient(sintomas={'dolor_toracico': None})
+    result = evaluar_triaje(patient)
+    facts = result.metadata_motor['explicaciones']['hechos_finales']
+    assert 'dolor_toracico' not in facts
+
+
+def test_unseeded_cycle_is_rejected(tmp_path):
+    def change(config):
+        for name, dependency in [('A', 'B'), ('B', 'A')]:
+            config['reglas'].append({'id': 'LOOP_' + name, 'nombre': name, 'descripcion': name,
+                'condiciones': [{'hecho': 'loop_' + dependency, 'operador': '==', 'valor': True}],
+                'conclusion': name, 'efectos': {'loop_' + name: True}})
+    with pytest.raises(KnowledgeConfigurationError):
+        BaseConocimiento(write_config(tmp_path, change))
+
+
+def test_all_producers_are_preserved(tmp_path):
+    def change(config):
+        for number in [1, 2]:
+            config['reglas'].append({'id': f'PRODUCER_{number}', 'nombre': 'Productor', 'descripcion': 'Prueba',
+                'condiciones': [{'hecho': 'edad', 'operador': '>=', 'valor': 0}],
+                'conclusion': 'Hecho compartido', 'efectos': {'compartido': True}})
+    result = MotorTriaje(BaseConocimiento(write_config(tmp_path, change))).evaluar(normal_patient())
+    assert result.metadata_motor['explicaciones']['procedencia_hechos']['compartido']['reglas'] == ['PRODUCER_1', 'PRODUCER_2']
+
+
+@pytest.mark.parametrize('rule_id,vitals,symptoms,other', [
+ ('R006',{'presion_sistolica':90},{'sangrado_activo':True},{}),
+ ('R012',{'saturacion_oxigeno':94},{'dificultad_respiratoria':True},{}),
+ ('R013',{'frecuencia_cardiaca':120},{'dificultad_respiratoria':True},{}),
+ ('R015',{'frecuencia_cardiaca':50},{},{'nivel_conciencia':'Verbal'}),
+ ('R017',{'temperatura':39.5},{},{'nivel_conciencia':'Verbal'}),
+ ('R021',{}, {'dificultad_respiratoria':True},{'edad':2}),
+ ('R034',{'temperatura':38},{'alteracion_conducta':True},{})])
+def test_rule_boundary_does_not_fire(rule_id,vitals,symptoms,other):
+    patient=normal_patient(sintomas=symptoms,**other)
+    for key,value in vitals.items():setattr(patient.signos_vitales,key,value)
+    result=evaluar_triaje(patient)
+    assert not next(s for s in result.metadata_motor['traza_completa'] if s['regla_id']==rule_id)['activa']
+
+
+def test_impossible_numeric_conditions_rejected(tmp_path):
+    def change(config):
+        config['reglas'][0]['condiciones'] = [
+            {'hecho': 'fc', 'operador': '>', 'valor': 150},
+            {'hecho': 'fc', 'operador': '<', 'valor': 50}]
+    with pytest.raises(KnowledgeConfigurationError):
+        BaseConocimiento(write_config(tmp_path, change))
+
+
+def test_reference_report_uses_combined_knowledge():
+    from types import SimpleNamespace
+    candidate = SimpleNamespace(id='sx_' + '1' * 32, nombre='Síntoma sintético',
+                                descripcion='Justificación sintética para pruebas', nivel=3, activo=True)
+    patient = normal_patient(sintomas_adicionales={candidate.id: True})
+    dataset = ReferenceDataset.model_validate({'tipo': 'sintetico', 'referencia': 'Prueba de ampliaciones',
+        'casos': [{'paciente': patient.model_dump(mode='json'), 'nivel_referencia': 3}]})
+    report = evaluate_dataset(dataset, ampliaciones=[candidate])
+    assert report['concordancia_exacta'] == 1
+    assert report['sha256_conocimiento'] != BaseConocimiento().sha256

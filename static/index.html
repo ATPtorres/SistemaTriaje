@@ -266,6 +266,7 @@
             color: var(--text-primary);
         }
 
+        .sintoma-check select { width: 110px; max-width: 45%; font: inherit; border: 1px solid var(--border); border-radius: 4px; background: white; padding: 5px; }
         .sintoma-check input[type="checkbox"] {
             accent-color: var(--accent);
             width: 14px; height: 14px;
@@ -753,6 +754,24 @@
         @media (max-width: 400px) {
             .vitals-row { grid-template-columns: 1fr; }
         }
+
+        /* Additional knowledge follows the existing compact form controls. */
+        .additional-intro { font-size: .6875rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: .75rem; }
+        .additional-catalog { font-size: .75rem; line-height: 1.6; color: var(--text-secondary); }
+        .additional-field { display: block; margin-bottom: .75rem; font-size: .75rem; color: var(--text-secondary); }
+        .additional-field > span { display: block; margin-bottom: .375rem; }
+        .additional-field .field-select { font-size: .75rem; }
+        .catalog-actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; flex-wrap: wrap; }
+        .btn-secondary { background: var(--bg-input); border: 1px solid var(--border); border-radius: .375rem; padding: .5rem .625rem; color: var(--text-secondary); font: inherit; font-size: .6875rem; cursor: pointer; min-height: 36px; transition: border-color .15s, background-color .15s; }
+        .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-secondary); color: var(--text-primary); }
+        .btn-secondary:focus-visible, .knowledge-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+        .knowledge-link { color: var(--accent); text-decoration: none; font-size: .6875rem; line-height: 1.6; padding: .5rem 0; }
+        .knowledge-link:hover { text-decoration: underline; }
+        .simulation-button { width: 100%; margin-top: .5rem; font-size: .75rem; min-height: 40px; }
+        .catalog-status { font-size: .6875rem; line-height: 1.6; color: var(--text-secondary); margin-top: .5rem; }
+        .catalog-status.success { color: #15803d; }
+        .catalog-status.error { color: #b91c1c; }
+        .btn-secondary:disabled { opacity: .6; cursor: wait; }
     </style>
 </head>
 <body>
@@ -781,7 +800,7 @@
         <div class="panel-header"><h2 data-i18n="panel_title">Evaluacion de Paciente</h2></div>
         <div class="panel-body">
             <p class="scope-note">Prototipo de apoyo con reglas locales; no validado clínicamente. Requiere valoración profesional y no equivale a ESI, MTS, CTAS o ATS oficiales.</p>
-            <form id="triageForm" onsubmit="evaluar(event)">
+            <form id="triageForm" onsubmit="evaluar(event, true)">
                 <div class="field-group">
                     <label class="field-label" data-i18n="identificacion">Identificacion</label>
                     <div class="field-row">
@@ -818,19 +837,29 @@
                 <div class="field-group">
                     <label class="field-label" data-i18n="sintomas">Sintomas</label>
                     <div class="sintomas-list">
-                        <label class="sintoma-check"><input type="checkbox" id="sx1"> <span data-i18n="sx1">Dolor toracico</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx2"> <span data-i18n="sx2">Dificultad respiratoria</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx3"> <span data-i18n="sx3">Sangrado activo</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx4"> <span data-i18n="sx4">Convulsiones</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx5"> <span data-i18n="sx5">Alteracion de conducta</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx6"> <span data-i18n="sx6">Trauma significativo</span></label>
-                        <label class="sintoma-check"><input type="checkbox" id="sx7"> <span data-i18n="sx7">Dolor intenso (EVA>=7)</span></label>
+                        <label class="sintoma-check"><select id="sx1" aria-label="Dolor torácico"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx1">Dolor toracico</span></label>
+                        <label class="sintoma-check"><select id="sx2" aria-label="Dificultad respiratoria"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx2">Dificultad respiratoria</span></label>
+                        <label class="sintoma-check"><select id="sx3" aria-label="Sangrado activo"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx3">Sangrado activo</span></label>
+                        <label class="sintoma-check"><select id="sx4" aria-label="Convulsiones"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx4">Convulsiones</span></label>
+                        <label class="sintoma-check"><select id="sx5" aria-label="Alteración de conducta"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx5">Alteracion de conducta</span></label>
+                        <label class="sintoma-check"><select id="sx6" aria-label="Trauma significativo"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx6">Trauma significativo</span></label>
+                        <label class="sintoma-check"><select id="sx7" aria-label="Dolor intenso"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx7">Dolor intenso (EVA>=7)</span></label>
                     </div>
+                </div>
+                <div class="section-divider"></div>
+                <div class="field-group">
+                    <label class="field-label">Síntomas adicionales · Ampliaciones</label>
+                    <p class="additional-intro">Seleccione presente, ausente o no evaluado. Las reglas base permanecen protegidas.</p>
+                    <div class="additional-catalog" id="additionalSymptoms" aria-live="polite">Cargando catálogo…</div>
+                    <div class="catalog-actions"><button id="refreshCatalog" class="btn-secondary" type="button" aria-controls="additionalSymptoms" onclick="loadAdditionalSymptoms()">Actualizar catálogo</button>
+                    <a class="knowledge-link" href="/conocimiento">Administrar síntomas →</a></div>
+                    <p id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></p>
                 </div>
             </form>
         </div>
         <div class="panel-footer">
-            <button class="btn-primary" id="btnEval" onclick="evaluar(event)" data-i18n="btn_eval">Evaluar Triaje</button>
+            <button class="btn-primary" id="btnEval" onclick="evaluar(event, true)" data-i18n="btn_eval">Evaluar Triaje</button>
+            <button id="btnSave" class="btn-secondary simulation-button" type="button" onclick="evaluar(event)">Guardar</button>
         </div>
     </div>
 
@@ -951,6 +980,8 @@
                     <div class="result-color-text" id="resColor">--</div>
                 </div>
                 <div class="result-details">
+                    <p id="simulationNotice" hidden style="padding:12px;background:#e7f0fb;border-radius:8px">SIMULACIÓN · Este resultado no se ha guardado.</p>
+                    <p id="incompleteNotice" hidden style="padding:12px;background:#fff7ed;border-radius:8px;font-size:12px;line-height:1.6">Hay síntomas no evaluados. La prioridad se basa únicamente en los datos conocidos; complete la valoración profesional.</p>
                     <div class="result-row">
                         <div class="result-row-label" data-i18n="motivo">Motivo Clinico</div>
                         <div class="result-row-value" id="resMotivo">--</div>
@@ -987,6 +1018,11 @@
 </div>
 
 <script>
+// A local file or XAMPP preview cannot resolve the FastAPI routes.
+if (typeof location !== 'undefined' && (location.protocol === 'file:' ||
+    (['localhost', '127.0.0.1'].includes(location.hostname) && ['', '80'].includes(location.port)))) {
+    location.replace('http://localhost:8000/');
+}
 // ===================== I18N (ES / QU) =====================
 let LANG = localStorage.getItem('triaje_lang') || 'es';
 
@@ -1384,15 +1420,94 @@ function formatApiError(detail) {
   return String(detail || 'Error');
 }
 
-async function evaluar(e) {
+function readBaseSymptom(id) { const value = document.getElementById(id).value; return value === 'true' ? true : value === 'false' ? false : null; }
+
+let additionalSymptomsReady = false;
+let catalogRequestNumber = 0;
+async function loadAdditionalSymptoms() {
+    const requestNumber = ++catalogRequestNumber;
+    additionalSymptomsReady = false;
+    const container = document.getElementById('additionalSymptoms');
+    const button = document.getElementById('refreshCatalog');
+    const status = document.getElementById('catalogStatus');
+    button.disabled = true;
+    button.textContent = 'Actualizando…';
+    status.className = 'catalog-status';
+    status.textContent = 'Consultando los síntomas actuales del servidor…';
+    try {
+        const response = await fetch('/conocimiento/sintomas', { cache: 'no-store' });
+        if (!response.ok) throw new Error('El servidor devolvió HTTP ' + response.status + ' al consultar los síntomas.');
+        const data = await response.json();
+        if (requestNumber !== catalogRequestNumber) return;
+        if (!Array.isArray(data.sintomas)) throw new Error('Catálogo no válido');
+        const symptoms = data.sintomas.filter(s => s.activo);
+        const previous = new Map(Array.from(container.querySelectorAll('select[data-symptom]'), el => [el.dataset.symptom, el.value]));
+        container.replaceChildren();
+        for (const symptom of symptoms) {
+            const label = document.createElement('label');
+            label.className = 'additional-field';
+            const title = document.createElement('span');
+            title.textContent = symptom.nombre + ' · prioridad propuesta ' + symptom.nivel;
+            const select = document.createElement('select');
+            select.className = 'field-select';
+            select.dataset.symptom = symptom.id;
+            select.setAttribute('aria-label', symptom.nombre);
+            for (const [value, text] of [['', 'No evaluado'], ['true', 'Presente'], ['false', 'Ausente']]) {
+                const option = document.createElement('option');
+                option.value = value; option.textContent = text; select.append(option);
+            }
+            select.value = previous.get(symptom.id) || '';
+            label.append(title, select); container.append(label);
+        }
+        if (!container.children.length) container.textContent = 'Sin ampliaciones activas.';
+        additionalSymptomsReady = true;
+        status.className = 'catalog-status success';
+        status.textContent = 'Catálogo actualizado: ' + symptoms.length +
+            (symptoms.length === 1 ? ' síntoma activo' : ' síntomas activos') +
+            ' · ' + new Date().toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    } catch (error) {
+        if (requestNumber !== catalogRequestNumber) return;
+        status.className = 'catalog-status error';
+        status.textContent = 'No se pudo actualizar el catálogo. ' +
+            (error instanceof TypeError ? 'No se pudo conectar con el servidor local.' : error.message) +
+            ' Abra el sistema en http://localhost:8000 y vuelva a intentarlo.';
+    } finally {
+        if (requestNumber === catalogRequestNumber) {
+            button.disabled = false;
+            button.textContent = 'Actualizar catálogo';
+        }
+    }
+}
+
+let evaluationInProgress = false;
+let pendingSubmission = null;
+async function evaluar(e, simulacion = false) {
     if (e) e.preventDefault();
+    if (evaluationInProgress) return;
 
     const errors = validateForm();
     if (errors.length) { showFormErrors(errors); return; }
 
     const btn = document.getElementById('btnEval');
+    const saveButton = document.getElementById('btnSave');
+    evaluationInProgress = true;
     btn.disabled = true;
+    saveButton.disabled = true;
     btn.textContent = t('btn_proc');
+    saveButton.textContent = simulacion ? 'Guardar' : 'Guardando…';
+
+    if (!additionalSymptomsReady) {
+        await loadAdditionalSymptoms();
+        if (!additionalSymptomsReady) {
+            evaluationInProgress = false;
+            btn.disabled = false;
+            saveButton.disabled = false;
+            btn.textContent = t('btn_eval');
+            saveButton.textContent = 'Guardar';
+            alert(document.getElementById('catalogStatus').textContent);
+            return;
+        }
+    }
 
     const num = id => Number((document.getElementById(id).value || '').trim().replace(',', '.'));
 
@@ -1407,20 +1522,28 @@ async function evaluar(e) {
             temperatura: num('temp'),
             saturacion_oxigeno: Math.trunc(num('spo2'))
         },
+        sintomas_adicionales: Object.fromEntries(Array.from(document.querySelectorAll('#additionalSymptoms select[data-symptom]'), el => [el.dataset.symptom, el.value === '' ? null : el.value === 'true'])),
         nivel_conciencia: document.getElementById('conciencia').value,
         sintomas: {
-            dolor_toracico: document.getElementById('sx1').checked,
-            dificultad_respiratoria: document.getElementById('sx2').checked,
-            sangrado_activo: document.getElementById('sx3').checked,
-            convulsiones: document.getElementById('sx4').checked,
-            alteracion_conducta: document.getElementById('sx5').checked,
-            trauma_significativo: document.getElementById('sx6').checked,
-            dolor_intenso: document.getElementById('sx7').checked
+            dolor_toracico: readBaseSymptom('sx1'),
+            dificultad_respiratoria: readBaseSymptom('sx2'),
+            sangrado_activo: readBaseSymptom('sx3'),
+            convulsiones: readBaseSymptom('sx4'),
+            alteracion_conducta: readBaseSymptom('sx5'),
+            trauma_significativo: readBaseSymptom('sx6'),
+            dolor_intenso: readBaseSymptom('sx7')
         }
     };
 
+    if (!simulacion) {
+        const fingerprint = JSON.stringify(body);
+        if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint) {
+            pendingSubmission = { fingerprint, id: crypto.randomUUID() };
+        }
+        body.id_solicitud = pendingSubmission.id;
+    }
     try {
-        const r = await fetch('/triaje', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+        const r = await fetch(simulacion ? '/triaje/simular' : '/triaje', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         if (!r.ok) {
             let detail = null;
             try { detail = (await r.json()).detail; } catch (_) {}
@@ -1430,9 +1553,14 @@ async function evaluar(e) {
         const d = await r.json();
         lastResult = d;
         showResult(d);
-        pushHistory(d);
+        if (simulacion) { alert('Simulación completada: no se guardó ningún paciente ni evaluación.'); }
+        else { pushHistory(d); pendingSubmission = null; }
     } catch(err) { alert(t('err_net').replace('{m}', err.message)); }
-    finally { btn.disabled = false; btn.textContent = t('btn_eval'); }
+    finally {
+        evaluationInProgress = false;
+        btn.disabled = false; btn.textContent = t('btn_eval');
+        saveButton.disabled = false; saveButton.textContent = 'Guardar';
+    }
 }
 
 const contentAnimations = new WeakMap();
@@ -1453,6 +1581,8 @@ const txMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#2563eb' 
 const dotMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#3b82f6' };
 
 function showResult(d, silent) {
+    document.getElementById('incompleteNotice').hidden = !d.metadata_motor?.sintomas_no_evaluados?.length;
+    document.getElementById('simulationNotice').hidden = !d.metadata_motor?.simulacion;
     const sec = document.getElementById('resultSection');
     document.getElementById('resBanner').style.background = bgMap[d.nivel_prioridad];
     document.getElementById('resNivel').textContent = t('nivel') + ' ' + d.nivel_prioridad;
@@ -1536,6 +1666,7 @@ function renderHistory() {
 
 // Restore the language after all result state and rendering helpers are initialized.
 setLang(LANG);
+loadAdditionalSymptoms();
 </script>
 </body>
 </html>

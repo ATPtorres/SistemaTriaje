@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from sqlalchemy.exc import SQLAlchemyError
 from knowledge_base import BaseConocimiento, ENGINE_VERSION
 from models import DatosPaciente
 from triage_engine import MotorTriaje
@@ -37,8 +38,8 @@ class ReferenceDataset(BaseModel):
         return self
 
 
-def evaluate_dataset(dataset: ReferenceDataset, knowledge_path=None):
-    base = BaseConocimiento(knowledge_path)
+def evaluate_dataset(dataset: ReferenceDataset, knowledge_path=None, *, ampliaciones=None):
+    base = BaseConocimiento(knowledge_path, ampliaciones=ampliaciones)
     motor = MotorTriaje(base)
     matrix = [[0] * 5 for _ in range(5)]
     for case in dataset.casos:
@@ -69,12 +70,19 @@ def main():
     parser.add_argument('--cases', type=Path, required=True)
     parser.add_argument('--knowledge', type=Path)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--include-extensions', action='store_true', help='Evaluar el conocimiento activo de MySQL junto al archivo base')
     args = parser.parse_args()
     # Do not include input values in validation error messages or reports.
     try:
         dataset = ReferenceDataset.model_validate_json(args.cases.read_text(encoding='utf-8'))
-        report = evaluate_dataset(dataset, args.knowledge)
-    except (ValueError, OSError):
+        if args.include_extensions:
+            from database import SessionLocal
+            from symptom_extensions import listar_ampliaciones
+            with SessionLocal() as db:
+                report = evaluate_dataset(dataset, args.knowledge, ampliaciones=listar_ampliaciones(db))
+        else:
+            report = evaluate_dataset(dataset, args.knowledge)
+    except (ValueError, OSError, SQLAlchemyError):
         parser.exit(2, 'No se pudo validar el conjunto de referencia o la base de conocimiento.\n')
     output = json.dumps(report, ensure_ascii=False, indent=2) + '\n'
     if args.output:

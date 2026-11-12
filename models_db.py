@@ -24,6 +24,38 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 
+class SintomaAdicional(Base):
+    """Additive knowledge only; no foreign key or write access to base rules."""
+    __tablename__ = "sintomas_adicionales"
+    id = Column(String(35), primary_key=True)
+    nombre = Column(String(100), nullable=False)
+    nombre_normalizado = Column(String(100), nullable=False, unique=True)
+    descripcion = Column(String(500), nullable=False)
+    nivel = Column(Integer, nullable=False)
+    activo = Column(Boolean, nullable=False, default=True)
+    creado_en = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    desactivado_en = Column(DateTime, nullable=True)
+    revision = relationship('RevisionAmpliacion', uselist=False, cascade='all, delete-orphan')
+
+
+class RevisionAmpliacion(Base):
+    __tablename__ = 'revisiones_ampliaciones'
+    sintoma_id = Column(String(35), ForeignKey('sintomas_adicionales.id'), primary_key=True)
+    estado = Column(String(20), nullable=False, default='borrador')
+    creado_por = Column(String(100), nullable=False)
+    publicado_por = Column(String(100), nullable=True)
+    publicado_en = Column(DateTime, nullable=True)
+    ensayado_en = Column(DateTime, nullable=True)
+
+
+class SolicitudEvaluacion(Base):
+    __tablename__ = "solicitudes_evaluacion"
+    id = Column(String(36), primary_key=True)
+    huella = Column(String(64), nullable=False)
+    respuesta = Column(JSON, nullable=False)
+    creado_en = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+
 # =============================================================================
 # TABLA: PACIENTES
 # =============================================================================

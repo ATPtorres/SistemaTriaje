@@ -17,6 +17,7 @@ Documentacion Swagger:
     http://localhost:8000/docs
 """
 
+import hashlib
 import logging
 from contextlib import asynccontextmanager
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
@@ -32,7 +33,9 @@ from sqlalchemy.orm import Session
 
 from models import DatosPaciente, ResultadoTriaje
 from schemas import PacienteCreate
-from triage_engine import evaluar_triaje
+from triage_engine import evaluar_triaje, MotorTriaje
+from symptom_extensions import router as symptom_router, listar_ampliaciones
+from knowledge_access import router as access_router
 from fuzzy_engine import calcular_score_riesgo_difuso
 from knowledge_base import BaseConocimiento, KnowledgeConfigurationError
 from clinical_support import obtener_soporte_clinico_completo
@@ -42,7 +45,7 @@ from i18n import traducir_resultado
 from database import get_db, init_db
 from models_db import (
     Paciente, EvaluacionTriaje, SignosVitalesHistorial,
-    AlertaGenerada, DiagnosticoSugerido
+    AlertaGenerada, DiagnosticoSugerido, SolicitudEvaluacion
 )
 import crud
 
@@ -72,7 +75,7 @@ app = FastAPI(
         "en un prototipo académico no validado clínicamente. Integra: reglas locales, lógica difusa, "
         "explicaciones trazables y estado de implementación de protocolos oficiales."
     ),
-    version="4.0.0",
+    version="4.2.0",
     contact={"name": "Equipo de Desarrollo", "email": "dev@triaje-sistema.com"}
 )
 
@@ -101,7 +104,7 @@ async def knowledge_unavailable(_request, _exc):
 def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
     """
     Endpoint principal del Sistema Experto de Triaje.
-    
+
     Pipeline de evaluacion:
     1. Reglas locales versionadas -> prioridad y explicación de una misma ejecución
     2. Motor de logica difusa (Mamdani FIS) -> Score de riesgo
@@ -110,10 +113,20 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
     5. Guardar todo en MySQL
     """
     inicio = time.perf_counter()
+    huella = hashlib.sha256(json.dumps(paciente.model_dump(mode='json'), sort_keys=True).encode()).hexdigest()
+    if paciente.id_solicitud:
+        previous = db.get(SolicitudEvaluacion, paciente.id_solicitud)
+        if previous:
+            if previous.huella != huella:
+                raise HTTPException(409, 'La solicitud ya fue usada con otros datos.')
+            return ResultadoTriaje.model_validate(previous.respuesta)
 
     try:
         # Paso 1: Motor de reglas clasico
-        resultado = evaluar_triaje(paciente)
+        ampliaciones = listar_ampliaciones(db)
+        if not set(paciente.sintomas_adicionales) <= {s.id for s in ampliaciones}:
+            raise HTTPException(status_code=409, detail="El catálogo de síntomas cambió. Actualice la página.")
+        resultado = MotorTriaje(BaseConocimiento(ampliaciones=ampliaciones)).evaluar(paciente)
 
         # Paso 2: Logica difusa
         score_difuso, meta_difuso = calcular_score_riesgo_difuso(
@@ -153,7 +166,7 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
             "color": resultado.color,
             "motivo_clinico": resultado.motivo_clinico,
             "recomendacion": resultado.recomendacion,
-            "score_riesgo_difuso": round(score_difuso, 1),
+            "score_riesgo_difuso": (round(score_difuso, 1) if score_difuso is not None else None),
             "score_riesgo_multifactor": score_risk.get("score"),
             "nivel_riesgo": score_risk.get("nivel_riesgo"),
             "metodo_inferencia": "Forward Chaining (reglas locales); score difuso auxiliar",
@@ -207,7 +220,7 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
             crud.crear_diagnosticos_batch(db, diag_mapped, db_eval.id, commit=False)
 
         # Enriquecer resultado
-        resultado.score_riesgo_difuso = round(score_difuso, 1)
+        resultado.score_riesgo_difuso = (round(score_difuso, 1) if score_difuso is not None else None)
         resultado.metadata_motor = {
             **resultado.metadata_motor,
             "id_evaluacion": id_eval,
@@ -218,7 +231,8 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
             "traza_completa": traza_kb,
             "logica_difusa": {
                 "uso": "Indicador auxiliar no validado; no determina el nivel",
-                "score": round(score_difuso, 1),
+                "estado": meta_difuso["estado"], "motivo": meta_difuso["motivo"],
+                "score": (round(score_difuso, 1) if score_difuso is not None else None),
                 "num_reglas_activas": meta_difuso.get("num_reglas_activas", 0),
             },
             "idioma_explicaciones": "es",
@@ -232,6 +246,12 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
         idioma = getattr(paciente, "idioma", "es")
         resultado = traducir_resultado(resultado, idioma)
 
+        duracion_total = int((time.perf_counter() - inicio) * 1000)
+        db_eval.duracion_ms = duracion_total
+        resultado.metadata_motor['duracion_ms'] = duracion_total
+        if paciente.id_solicitud:
+            db.add(SolicitudEvaluacion(id=paciente.id_solicitud, huella=huella,
+                                      respuesta=resultado.model_dump(mode='json')))
         db.commit()
         return resultado
 
@@ -239,8 +259,14 @@ def clasificar_paciente(paciente: DatosPaciente, db: Session = Depends(get_db)):
         db.rollback()
         logger.exception("Configuración de conocimiento inválida")
         raise HTTPException(status_code=503, detail="Base de conocimiento no disponible; no se emitió clasificación.")
+    except HTTPException:
+        db.rollback()
+        raise
     except IntegrityError:
         db.rollback()
+        previous = db.get(SolicitudEvaluacion, paciente.id_solicitud) if paciente.id_solicitud else None
+        if previous and previous.huella == huella:
+            return ResultadoTriaje.model_validate(previous.respuesta)
         raise HTTPException(status_code=409, detail="Conflicto al guardar el paciente; vuelva a intentar.")
     except SQLAlchemyError:
         db.rollback()
@@ -394,9 +420,9 @@ def detalle_evaluacion_endpoint(evaluacion_id: str, db: Session = Depends(get_db
 # =============================================================================
 
 @app.get("/knowledge-base", summary="Consultar base de conocimiento", tags=["Conocimiento"])
-def consultar_base_conocimiento():
+def consultar_base_conocimiento(db: Session = Depends(get_db)):
     """Retorna todas las reglas de la base de conocimiento del sistema experto."""
-    kb = BaseConocimiento()
+    kb = BaseConocimiento(ampliaciones=listar_ampliaciones(db))
     return {
         "total_reglas": len(kb.listar_reglas_activas()),
         "version": kb.config.version,
@@ -410,9 +436,9 @@ def consultar_base_conocimiento():
 
 
 @app.get("/decision-tree", summary="Arbol de decision visual", tags=["Conocimiento"])
-def arbol_decision():
+def arbol_decision(db: Session = Depends(get_db)):
     """Retorna el arbol de decision serializado para visualizacion."""
-    kb = BaseConocimiento()
+    kb = BaseConocimiento(ampliaciones=listar_ampliaciones(db))
 
     def serializar_nodo(nodo):
         return {
@@ -487,26 +513,13 @@ def estadistica_diaria(db: Session = Depends(get_db)):
 @app.get("/estadisticas/tendencia", tags=["Analytics"], summary="Tendencia de evaluaciones")
 def tendencia_evaluaciones(dias: int = Query(7, ge=1, le=30), db: Session = Depends(get_db)):
     """Tendencia de evaluaciones por nivel en los ultimos N dias."""
-    from sqlalchemy import func
-    from models_db import EstadisticaDiaria
+    from datetime import timedelta
+    today = crud.fecha_local()
+    return {'periodo': f'Últimos {dias} días',
+            'zona_horaria': __import__('os').getenv('TRIAGE_TIMEZONE', 'America/La_Paz'),
+            'datos': [crud.resumen_dia(db, today - timedelta(days=offset))
+                      for offset in range(dias - 1, -1, -1)]}
 
-    stats = db.query(EstadisticaDiaria).order_by(
-        EstadisticaDiaria.fecha.desc()
-    ).limit(dias).all()
-
-    return {
-        "periodo": f"Ultimos {dias} dias",
-        "datos": [
-            {
-                "fecha": s.fecha,
-                "total": s.total_evaluaciones,
-                "nivel_1": s.nivel_1, "nivel_2": s.nivel_2,
-                "nivel_3": s.nivel_3, "nivel_4": s.nivel_4,
-                "nivel_5": s.nivel_5,
-            }
-            for s in reversed(stats)
-        ]
-    }
 
 
 @app.get("/estadisticas/diagnosticos-frecuentes", tags=["Analytics"])
@@ -528,16 +541,19 @@ def health_check(db: Session = Depends(get_db)):
         db_status = "disconnected"
 
     try:
-        knowledge = BaseConocimiento()
+        if db_status != "connected":
+            raise KnowledgeConfigurationError("No se pudo comprobar el conocimiento ampliado")
+        knowledge = BaseConocimiento(ampliaciones=listar_ampliaciones(db))
         knowledge_status = {"estado": "disponible", "version": knowledge.config.version,
                             "sha256": knowledge.sha256}
-    except KnowledgeConfigurationError:
+    except (KnowledgeConfigurationError, SQLAlchemyError):
+        db.rollback()
         knowledge_status = {"estado": "no_disponible"}
     ready = db_status == "connected" and knowledge_status["estado"] == "disponible"
     return JSONResponse(status_code=200 if ready else 503, content={
         "status": "healthy" if ready else "degraded",
         "service": "sistema-triaje-experto",
-        "version": "4.0.0",
+        "version": "4.2.0",
         "database": db_status,
         "modulos": ["triage_engine", "fuzzy_engine", "knowledge_base", "clinical_support"],
         "conocimiento": knowledge_status,
@@ -555,6 +571,10 @@ def root():
 # =============================================================================
 # PUNTO DE ENTRADA
 # =============================================================================
+
+app.include_router(symptom_router)
+app.include_router(access_router)
+
 
 if __name__ == "__main__":
     import uvicorn

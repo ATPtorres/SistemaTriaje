@@ -6,9 +6,11 @@ Create, Read, Update, Delete para todas las entidades del sistema.
 Patron Repository: encapsula acceso a datos detras de una interfaz.
 """
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, time
+from zoneinfo import ZoneInfo
+import os
 from sqlalchemy.orm import Session
-from sqlalchemy import func, desc
+from sqlalchemy import func, desc, case
 
 from models_db import (
     Paciente, EvaluacionTriaje, SignosVitalesHistorial,
@@ -130,12 +132,29 @@ def obtener_evaluaciones_por_nivel(db: Session, nivel: int) -> list[EvaluacionTr
     ).order_by(desc(EvaluacionTriaje.fecha_evaluacion)).all()
 
 
+def fecha_local():
+    return datetime.now(ZoneInfo(os.getenv('TRIAGE_TIMEZONE', 'America/La_Paz'))).date()
+
+
+def limites_dia(fecha):
+    zone = ZoneInfo(os.getenv('TRIAGE_TIMEZONE', 'America/La_Paz'))
+    lower = datetime.combine(fecha, time.min, tzinfo=zone).astimezone(timezone.utc).replace(tzinfo=None)
+    upper = datetime.combine(fecha + timedelta(days=1), time.min, tzinfo=zone).astimezone(timezone.utc).replace(tzinfo=None)
+    return lower, upper
+
+
+def resumen_dia(db, fecha):
+    lower, upper = limites_dia(fecha)
+    row = db.query(func.count(EvaluacionTriaje.id),
+                   *(func.coalesce(func.sum(case((EvaluacionTriaje.nivel_prioridad == n, 1), else_=0)), 0) for n in range(1, 6)),
+                   func.avg(EvaluacionTriaje.duracion_ms)).filter(
+        EvaluacionTriaje.fecha_evaluacion >= lower, EvaluacionTriaje.fecha_evaluacion < upper).one()
+    return {'fecha': fecha.isoformat(), 'total': row[0],
+            **{f'nivel_{n}': row[n] for n in range(1, 6)}, 'tiempo_promedio_ms': row[6]}
+
+
 def contar_evaluaciones_hoy(db: Session) -> int:
-    """Cuenta las evaluaciones realizadas hoy."""
-    from sqlalchemy import func as sa_func
-    return db.query(EvaluacionTriaje).filter(
-        func.date(EvaluacionTriaje.fecha_evaluacion) == sa_func.date(sa_func.now())
-    ).count()
+    return resumen_dia(db, fecha_local())['total']
 
 
 # =============================================================================
@@ -299,7 +318,7 @@ def eliminar_regla(db: Session, regla_id: int) -> bool:
 
 def obtener_o_crear_estadistica_hoy(db: Session) -> EstadisticaDiaria:
     """Obtiene o crea el registro de estadistica del dia."""
-    hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    hoy = fecha_local().isoformat()
     stats = db.query(EstadisticaDiaria).filter(
         EstadisticaDiaria.fecha == hoy
     ).first()
@@ -318,24 +337,13 @@ def actualizar_estadisticas(db: Session):
     from sqlalchemy import func as sa_func
     stats = obtener_o_crear_estadistica_hoy(db)
 
-    # Contar por nivel
+    summary = resumen_dia(db, fecha_local())
     for nivel in range(1, 6):
-        count = db.query(EvaluacionTriaje).filter(
-            EvaluacionTriaje.nivel_prioridad == nivel,
-            func.date(EvaluacionTriaje.fecha_evaluacion) == sa_func.date(sa_func.now())
-        ).count()
-        setattr(stats, f"nivel_{nivel}", count)
-
-    # Total
-    stats.total_evaluaciones = sum(
-        getattr(stats, f"nivel_{i}") for i in range(1, 6)
-    )
-
-    # Tiempo promedio
-    avg_time = db.query(func.avg(EvaluacionTriaje.duracion_ms)).filter(
-        func.date(EvaluacionTriaje.fecha_evaluacion) == sa_func.date(sa_func.now())
-    ).scalar()
-    stats.tiempo_promedio_evaluacion_ms = int(avg_time) if avg_time else None
+        setattr(stats, f'nivel_{nivel}', summary[f'nivel_{nivel}'])
+    stats.total_evaluaciones = summary['total']
+    avg_time = summary['tiempo_promedio_ms']
+    stats.tiempo_promedio_evaluacion_ms = round(avg_time) if avg_time is not None else None
+    lower, upper = limites_dia(fecha_local())
 
     # Diagnostico mas comun hoy
     top_diag = db.query(
@@ -344,7 +352,7 @@ def actualizar_estadisticas(db: Session):
     ).join(
         EvaluacionTriaje
     ).filter(
-        func.date(EvaluacionTriaje.fecha_evaluacion) == sa_func.date(sa_func.now())
+        EvaluacionTriaje.fecha_evaluacion >= lower, EvaluacionTriaje.fecha_evaluacion < upper
     ).group_by(
         DiagnosticoSugerido.nombre_diagnostico
     ).order_by(

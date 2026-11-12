@@ -19,6 +19,9 @@ class MotorTriaje:
             signos_alerta=list(dict.fromkeys(alert for rule in rules for alert in rule.alertas)),
             recomendacion=output.recomendacion,
             metadata_motor={
+                'sintomas_no_evaluados': sorted(
+                    [name for name, value in paciente.sintomas.model_dump().items() if value is None] +
+                    [name for name in self.base.config.entradas_adicionales if paciente.sintomas_adicionales.get(name) is None]),
                 'metodo_inferencia': 'Forward Chaining (reglas locales)',
                 'reglas_evaluadas': len(trace), 'reglas_activadas': sum(s['activa'] for s in trace),
                 'explicaciones': explanation, 'traza_completa': trace,

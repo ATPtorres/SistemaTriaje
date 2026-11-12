@@ -40,7 +40,7 @@ Se excluyen cachés, archivos de entorno, bases de datos locales y el proyecto i
 ## Pruebas
 
 ```powershell
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements-lock.txt
 python -m pytest -q
 node --test tests/frontend.test.cjs
 ```
@@ -57,7 +57,7 @@ Las pruebas de integración utilizan SQLite en memoria y no leen ni modifican lo
 
 ## Alcance actual
 
-La aplicación está preparada para desarrollo local. Aún no incorpora autenticación ni control de acceso a historias clínicas. La corrección de software y las pruebas de regresión no constituyen una validación clínica de las reglas, puntuaciones, traducciones o equivalencias entre protocolos.
+La aplicación está preparada para desarrollo local. La administración del conocimiento requiere sesión de administrador; la operación y consulta de pacientes todavía no tienen cuentas individuales ni permisos clínicos. La corrección de software y las pruebas de regresión no constituyen una validación clínica de las reglas, puntuaciones, traducciones o equivalencias entre protocolos.
 
 ## Motor experto y edición del conocimiento
 
@@ -80,3 +80,33 @@ python clinical_validation.py --cases tests/fixtures/triage_regression.json --ou
 ```
 
 Los 62 casos incluidos son sintéticos y prueban conservación del comportamiento anterior, con sus limitaciones. El comando informa concordancia, subtriaje, sobretriaje y sensibilidad por nivel; rechaza conjuntos vacíos o mal formados. Ver [VALIDACION_CLINICA.md](VALIDACION_CLINICA.md) para los datos y la revisión externa que faltan. La validación clínica permanece pendiente, independientemente del resultado de las pruebas de software.
+
+## Síntomas adicionales y acceso controlado
+
+Abrir `/conocimiento`. El operador puede consultar el catálogo. Para crear, probar, publicar o desactivar ampliaciones se requiere una sesión de administrador, además del acceso local y la verificación de origen. Configurar una vez con `python setup_local_access.py`; las credenciales se escriben en `acceso-local.txt` y el hash en `.env`, ambos excluidos de Git. La contraseña se deriva con PBKDF2; la cookie es HttpOnly y SameSite Strict, expira en ocho horas y queda invalidada si cambia el hash. El acceso a pacientes sigue siendo local y no tiene usuarios individuales.
+
+Las nuevas ampliaciones se guardan como borradores. «Probar borrador» ejecuta tres casos sintéticos (no evaluado, ausente y presente) sin guardar pacientes. El administrador puede publicar la regla después de revisarla. Se registran autor, estado y responsable/fecha de publicación en `revisiones_ampliaciones`. El ensayo no constituye aprobación clínica. Los síntomas activos existentes se conservan como publicados; no se alteran evaluaciones históricas.
+
+El servidor solo genera la regla «síntoma presente → proponer prioridad 2, 3 o 4». No admite edición de reglas base, umbrales, efectos arbitrarios, colores o recomendaciones. La prioridad final sigue siendo la más urgente. El JSON original nunca se escribe desde la interfaz. Los snapshots incluyen reglas base y publicadas, sus IDs y hash.
+
+Todos los síntomas, originales y adicionales, admiten presente/ausente/no evaluado. Un valor omitido o `null` no produce un hecho de ausencia. Los clientes anteriores que envían booleanos explícitos siguen siendo compatibles. En los 62 casos históricos se hicieron explícitos los `false` que el modelo anterior aplicaba por defecto: se conservaron sus etiquetas y significado original, no se introdujo adjudicación clínica.
+
+«Evaluar Triaje» simula sin persistir. «Guardar» registra la evaluación. Cada intento de guardado desde la interfaz lleva un `id_solicitud` UUID; el reintento con los mismos datos devuelve el resultado original. Reutilizar el ID con datos distintos devuelve 409. La clave y respuesta se guardan en la misma transacción que la evaluación, incluyendo protección frente a solicitudes concurrentes. Un guardado nuevo tras una respuesta exitosa genera otra clave.
+
+El indicador difuso devuelve `null` y un motivo cuando faltan entradas, están fuera de sus rangos o no hay área de inferencia. No se inventa un puntaje intermedio ni se modifica la prioridad principal. La defuzzificación agrupa reglas con el mismo consecuente. La validación estructural rechaza cadenas derivadas sin punto de entrada; no demuestra corrección clínica de las reglas.
+
+## Esquema, fechas y verificación reproducible
+
+`migrations.py` registra la actualización aditiva `4.2.0-additive`. Al iniciar se crean las tablas nuevas sin eliminar tablas ni modificar registros de pacientes. No hay downgrade automático. Las futuras modificaciones de columnas requieren una nueva migración explícita, no solo cambiar el modelo.
+
+Las fechas se almacenan en UTC. Las estadísticas calculan los límites del día en `TRIAGE_TIMEZONE` (por defecto `America/La_Paz`) y consultan intervalos UTC indexables. La tendencia devuelve días consecutivos, incluyendo los días sin evaluaciones.
+
+`requirements-lock.txt` fija el entorno Python verificado. El workflow `.github/workflows/tests.yml` ejecuta Python, interfaz y la integración de base de datos. Para ejecutar las mismas pruebas de API sobre MySQL, usar `TEST_MYSQL_URL` apuntando exclusivamente a una base temporal cuyo nombre empiece por `triaje_test_`; la prueba limpia sus tablas. Nunca utilizar la base de pacientes para pruebas. El entorno local de pruebas estándar sigue usando SQLite aislado.
+
+Para comparar las prioridades del conocimiento combinado con casos de referencia:
+
+```powershell
+python clinical_validation.py --cases tests/fixtures/triage_regression.json --include-extensions
+```
+
+También se puede pasar `--knowledge` con un snapshot combinado exportado para reproducir exactamente su versión. La validación clínica permanece pendiente.
