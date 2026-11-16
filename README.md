@@ -67,7 +67,7 @@ El resultado y su explicación usan una sola ejecución. Cada evaluación guarda
 
 Para cambiar reglas, editar `knowledge/triage_rules.json`, aumentar `version`, revisar en Git y ejecutar las pruebas. Se puede seleccionar otro archivo mediante `TRIAGE_KNOWLEDGE_PATH` (ruta absoluta recomendada). La API lo lee en cada nueva evaluación; una ejecución conserva su propia copia. Desplegar el archivo completo de forma atómica. Un archivo ausente o inválido impide clasificar; no hay fallback silencioso a reglas antiguas. No se ejecutan expresiones Python desde el JSON ni se permite editar reglas mediante endpoints sin autenticación.
 
-`/knowledge-base` muestra las reglas realmente cargadas y su versión/hash. `/decision-tree` es un catálogo generado a partir de esas reglas, no un algoritmo oficial de triaje. La interfaz muestra la explicación desplegable y el alcance de la prioridad local. Los textos nuevos de razonamiento están en español; las traducciones clínicas requieren revisión profesional.
+`/knowledge-base` muestra las reglas realmente cargadas y su versión/hash. `/decision-tree` es un catálogo generado a partir de esas reglas, no un algoritmo oficial de triaje. La interfaz muestra la prioridad local, la recomendación y una explicación breve basada en las observaciones asociadas a las reglas decisivas de esa evaluación. Las reglas, los hechos, la traza y el snapshot se consultan en «Auditoría técnica». En el modo quechua, los textos clínicos se muestran en español e indican que su traducción requiere revisión profesional.
 
 ## Protocolos y evaluación de referencia
 

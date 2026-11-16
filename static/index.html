@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Triaje Medico</title>
+    <title>Sistema de Triaje</title>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -13,8 +13,8 @@
             --border: #e5e7eb;
             --border-hover: #d1d5db;
             --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --text-muted: #9ca3af;
+            --text-secondary: #374151;
+            --text-muted: #4b5563;
             --accent: #2563eb;
             --accent-glow: rgba(37,99,235,0.12);
             --red: #dc2626;
@@ -41,16 +41,13 @@
 
         /* ===================== HEADER ===================== */
         .top-bar {
-            height: 48px;
+            min-height: 48px;
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 1.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 200;
         }
 
         .top-bar-left { display: flex; align-items: center; gap: 1rem; }
@@ -78,19 +75,13 @@
             border-radius: 9999px;
             font-size: 0.6875rem;
             font-weight: 500;
-            color: #16a34a;
+            color: #166534;
         }
 
         .status-dot {
             width: 6px; height: 6px;
             background: #22c55e;
             border-radius: 50%;
-            animation: statusPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes statusPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-            50% { box-shadow: 0 0 0 3px rgba(34,197,94,0); }
         }
 
         .top-bar-clock {
@@ -104,7 +95,6 @@
             display: flex;
             border: 1px solid var(--border);
             border-radius: 9999px;
-            overflow: hidden;
             margin-right: 0.75rem;
         }
 
@@ -135,8 +125,7 @@
         /* ===================== MAIN GRID ===================== */
         .main-grid {
             display: grid;
-            grid-template-columns: 360px 1fr;
-            height: calc(100vh - 48px);
+            grid-template-columns: minmax(0, 420px) minmax(0, 1fr);
         }
 
         /* ===================== LEFT PANEL ===================== */
@@ -161,8 +150,6 @@
         }
 
         .panel-body {
-            flex: 1;
-            overflow-y: auto;
             padding: 1rem 1.25rem;
         }
 
@@ -171,17 +158,17 @@
         }
 
         .field-label {
-            font-size: 0.6875rem;
-            font-weight: 500;
-            color: var(--text-muted);
-            margin-bottom: 0.375rem;
+            font-size: 1rem;
+            font-weight: 650;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
             display: block;
         }
 
         .field-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
             margin-bottom: 0.5rem;
         }
 
@@ -194,7 +181,6 @@
             color: var(--text-primary);
             font-size: 0.8125rem;
             font-family: inherit;
-            outline: none;
             transition: all 0.2s;
         }
 
@@ -202,8 +188,6 @@
             border-color: var(--accent);
             box-shadow: 0 0 0 2px var(--accent-glow);
         }
-
-        .field-input::placeholder { color: var(--text-muted); }
 
         .field-input.invalid,
         .field-select.invalid {
@@ -221,7 +205,6 @@
             color: var(--text-primary);
             font-size: 0.8125rem;
             font-family: inherit;
-            outline: none;
             cursor: pointer;
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
@@ -248,7 +231,8 @@
         }
 
         .sintoma-check {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 8.5rem);
             align-items: center;
             gap: 0.5rem;
             padding: 0.4375rem 0.625rem;
@@ -266,13 +250,7 @@
             color: var(--text-primary);
         }
 
-        .sintoma-check select { width: 110px; max-width: 45%; font: inherit; border: 1px solid var(--border); border-radius: 4px; background: white; padding: 5px; }
-        .sintoma-check input[type="checkbox"] {
-            accent-color: var(--accent);
-            width: 14px; height: 14px;
-            cursor: pointer;
-        }
-
+        .sintoma-check select { width: 100%; }
         .btn-primary {
             width: 100%;
             padding: 0.6875rem;
@@ -311,7 +289,6 @@
 
         .dash-content {
             flex: 1;
-            overflow-y: auto;
             padding: 1.25rem;
             display: flex;
             flex-direction: column;
@@ -321,7 +298,7 @@
         /* ===================== VITAL SIGNS ROW ===================== */
         .vitals-row {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
             gap: 0.75rem;
         }
 
@@ -346,12 +323,6 @@
         .vital-card.state-warning { border-color: rgba(234,88,12,0.4); }
         .vital-card.state-critical {
             border-color: rgba(220,38,38,0.5);
-            animation: cardCritical 1.5s ease-in-out infinite;
-        }
-
-        @keyframes cardCritical {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.08); }
-            50% { box-shadow: 0 0 8px 0 rgba(220,38,38,0.12); }
         }
 
         .vital-icon {
@@ -445,7 +416,6 @@
             width: 5px; height: 5px;
             background: #22c55e;
             border-radius: 50%;
-            animation: statusPulse 1.5s ease-in-out infinite;
         }
 
         .ecg-rate-display {
@@ -500,7 +470,7 @@
         }
 
         .result-nivel-big {
-            font-size: 4rem;
+            font-size: clamp(1.75rem, 6vw, 2.75rem);
             font-weight: 800;
             line-height: 1;
             letter-spacing: -0.03em;
@@ -532,10 +502,8 @@
         .result-row:last-child { border-bottom: none; }
 
         .result-row-label {
-            font-size: 0.625rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+            font-size: 1rem;
+            font-weight: 650;
             color: var(--text-muted);
             margin-bottom: 0.25rem;
         }
@@ -573,17 +541,6 @@
             border-radius: 50%;
         }
 
-        .recom-box {
-            background: var(--blue-bg);
-            border: 1px solid rgba(37,99,235,0.15);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-top: 0.5rem;
-        }
-
-        .recom-box .result-row-label { color: #2563eb; }
-        .recom-box .result-row-value { color: #1e40af; }
-
         .scope-note { font-size: 0.75rem; line-height: 1.5; color: var(--text-secondary); margin-bottom: 1rem; }
         .reasoning { margin-top: 0.75rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.625rem; }
         .reasoning summary { cursor: pointer; font-size: 0.8125rem; font-weight: 600; }
@@ -595,7 +552,7 @@
         /* ===================== GAUGE DIAL (SVG) ===================== */
         .gauge-row {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
             gap: 0.75rem;
         }
 
@@ -648,8 +605,8 @@
         .history-strip {
             display: flex;
             gap: 0.5rem;
-            overflow-x: auto;
-            padding-bottom: 0.25rem;
+            flex-wrap: wrap;
+            padding: 0.25rem;
         }
 
         .history-strip::-webkit-scrollbar { height: 4px; }
@@ -657,7 +614,7 @@
         .history-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
         .history-chip {
-            flex-shrink: 0;
+            max-width: 100%;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -678,7 +635,7 @@
             flex-shrink: 0;
         }
 
-        .history-chip-id { font-weight: 600; color: var(--text-primary); }
+        .history-chip-id { font-weight: 600; color: var(--text-primary); text-align: start; overflow-wrap: anywhere; }
 
         .history-chip-badge {
             font-size: 0.625rem;
@@ -710,10 +667,7 @@
             transition: border-color 160ms ease, background-color 160ms ease,
                         box-shadow 160ms ease, transform 160ms ease;
         }
-        .history-chip:focus-visible, .lang-btn:focus-visible, .btn-primary:focus-visible {
-            outline: 2px solid var(--accent);
-            outline-offset: 3px;
-        }
+
         @media (hover: hover) and (pointer: fine) {
             .history-chip:hover {
                 transform: translateY(-1px);
@@ -735,13 +689,9 @@
             .main-grid { grid-template-columns: minmax(0, 1fr); height: auto; }
             .left-panel { border-right: none; border-bottom: 1px solid var(--border); }
             .panel-body, .right-panel, .dash-content { overflow: visible; }
-            .vitals-row { grid-template-columns: repeat(3, 1fr); }
-            .gauge-row { grid-template-columns: repeat(2, 1fr); }
         }
 
         @media (max-width: 640px) {
-            .vitals-row { grid-template-columns: 1fr 1fr; }
-            .gauge-row { grid-template-columns: 1fr 1fr; }
             .field-row { grid-template-columns: 1fr; }
             .top-bar { height: auto; min-height: 48px; padding: 0.25rem 0.75rem; gap: 0.5rem; }
             .top-bar-left { min-width: 0; gap: 0.5rem; }
@@ -752,7 +702,7 @@
         }
 
         @media (max-width: 400px) {
-            .vitals-row { grid-template-columns: 1fr; }
+            .sintoma-check { grid-template-columns: minmax(0, 1fr); }
         }
 
         /* Additional knowledge follows the existing compact form controls. */
@@ -764,7 +714,6 @@
         .catalog-actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-top: .75rem; flex-wrap: wrap; }
         .btn-secondary { background: var(--bg-input); border: 1px solid var(--border); border-radius: .375rem; padding: .5rem .625rem; color: var(--text-secondary); font: inherit; font-size: .6875rem; cursor: pointer; min-height: 36px; transition: border-color .15s, background-color .15s; }
         .btn-secondary:hover { border-color: var(--border-hover); background: var(--bg-secondary); color: var(--text-primary); }
-        .btn-secondary:focus-visible, .knowledge-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
         .knowledge-link { color: var(--accent); text-decoration: none; font-size: .6875rem; line-height: 1.6; padding: .5rem 0; }
         .knowledge-link:hover { text-decoration: underline; }
         .simulation-button { width: 100%; margin-top: .5rem; font-size: .75rem; min-height: 40px; }
@@ -772,85 +721,166 @@
         .catalog-status.success { color: #15803d; }
         .catalog-status.error { color: #b91c1c; }
         .btn-secondary:disabled { opacity: .6; cursor: wait; }
+        [hidden] { display: none !important; }
+        :where(button, a, input, select, summary, [tabindex]):focus-visible {
+            outline: 3px solid #1d4ed8;
+            outline-offset: 2px;
+        }
+        .lang-btn.active:focus-visible { outline: 2px solid white; outline-offset: -4px; }
+        :where(#formHeading, #resultSection) { scroll-margin-block-start: 0.75rem; }
+        .field-control, .dash-content, .field-group { min-width: 0; }
+        .field-control { display: grid; align-content: start; gap: 0.25rem; }
+        .field-control label, .additional-field { overflow-wrap: anywhere; }
+        .field-control label, .sintoma-check, .additional-field, .additional-intro,
+        .additional-catalog, .catalog-status, .scope-note, .history-chip, .empty-hist {
+            font-size: 0.9375rem;
+        }
+        .field-input, .field-select, .additional-field .field-select {
+            min-height: 44px;
+            font-size: 1rem;
+            border-color: #64748b;
+        }
+        .field-select { padding-right: 1.75rem; }
+        .btn-primary, .btn-secondary, .history-chip, .action-link, .knowledge-link, .reasoning summary {
+            min-height: 44px;
+            font-size: 0.9375rem;
+        }
+        .btn-secondary, .history-chip { border-color: #64748b; }
+        .btn-primary[aria-disabled="true"], .btn-secondary[aria-disabled="true"] { cursor: wait; }
+        .action-link, .knowledge-link { display: inline-flex; align-items: center; color: #1d4ed8; text-decoration: underline; }
+        .field-error, .evaluation-error { color: #991b1b; }
+        .field-error { font-size: 0.875rem; }
+        .evaluation-status, .evaluation-error, #historyStatus { font-size: 0.9375rem; line-height: 1.5; }
+        .evaluation-status:not(:empty), .evaluation-error:not(:empty), #historyStatus:not(:empty) { margin-top: 0.5rem; }
+        .result-section, .history-strip, .indicators { overflow-wrap: anywhere; }
+        .result-patient { font-weight: 600; margin-bottom: 0.5rem; }
+        .result-row-value, .result-reasons { font-size: 1rem; color: var(--text-primary); line-height: 1.55; }
+        .result-reasons { padding-inline-start: 1.25rem; margin-top: 0.375rem; }
+        .result-reasons li + li { margin-top: 0.25rem; }
+        .result-notice { margin-top: 0.625rem; padding: 0.625rem; border-radius: 0.375rem; background: #fff7ed; line-height: 1.5; }
+        .result-scope { margin: 0.75rem 0 0; }
+        .reasoning summary { padding-block: 0.625rem; line-height: 1.5; }
+        .reasoning p, .reasoning li, .reasoning pre { font-size: 0.875rem; line-height: 1.5; }
+        .reasoning pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+        .audit-block { border-top: 1px solid var(--border); margin-top: 0.5rem; }
+        .indicators { margin-top: 0; }
+        .indicators > :not(summary) { margin-top: 0.75rem; }
+        .history-chip[aria-pressed="true"] { border-color: var(--accent); background: #eff6ff; }
+        .alert-tag { color: #991b1b; font-size: 0.875rem; }
+        @media (max-width: 640px) {
+            .panel-header, .panel-body, .panel-footer, .dash-content { padding-inline: 1rem; }
+        }
     </style>
 </head>
 <body>
 
 <!-- ===================== TOP BAR ===================== -->
-<div class="top-bar">
+<header class="top-bar">
     <div class="top-bar-left">
         <div class="logo-mark">T</div>
-        <span class="top-bar-title" data-i18n="app_title">Sistema de Triaje</span>
+        <h1 class="top-bar-title" data-i18n="app_title">Sistema de Triaje</h1>
         <div class="status-pill"><div class="status-dot"></div><span data-i18n="online">Online</span></div>
     </div>
     <div style="display:flex;align-items:center">
         <div class="lang-toggle" id="langToggle">
-            <button type="button" class="lang-btn active" data-lang="es" onclick="setLang('es')">ES</button>
-            <button type="button" class="lang-btn" data-lang="qu" onclick="setLang('qu')">QU</button>
+            <button type="button" aria-label="Español" lang="es" class="lang-btn active" data-lang="es" onclick="setLang('es')">ES</button>
+            <button type="button" aria-label="Quechua" lang="es" class="lang-btn" data-lang="qu" onclick="setLang('qu')">QU</button>
         </div>
-        <div class="top-bar-clock" id="clock"></div>
+        <div class="top-bar-clock" id="clock" lang="es"></div>
     </div>
-</div>
+</header>
 
 <!-- ===================== MAIN ===================== -->
-<div class="main-grid" id="triageWorkspace">
+<main class="main-grid" id="triageWorkspace">
 
     <!-- LEFT: FORM -->
     <div class="left-panel">
-        <div class="panel-header"><h2 data-i18n="panel_title">Evaluacion de Paciente</h2></div>
+        <div class="panel-header" id="formHeading" tabindex="-1"><h2 data-i18n="panel_title">Evaluacion de Paciente</h2></div>
         <div class="panel-body">
-            <p class="scope-note">Prototipo de apoyo con reglas locales; no validado clínicamente. Requiere valoración profesional y no equivale a ESI, MTS, CTAS o ATS oficiales.</p>
-            <form id="triageForm" onsubmit="evaluar(event, true)">
+            <p class="scope-note" lang="es">Prototipo con prioridades locales y validación clínica pendiente. Requiere valoración profesional. ESI, MTS, CTAS y ATS oficiales no están implementados.</p>
+            <p class="scope-note" id="translationNotice" lang="es" hidden>Las etiquetas clínicas, la recomendación y la explicación se muestran en español. Su traducción al quechua requiere revisión profesional.</p>
+            <form id="triageForm" lang="es" novalidate oninput="formEdited(event)" onsubmit="evaluar(event, true)">
                 <div class="field-group">
-                    <label class="field-label" data-i18n="identificacion">Identificacion</label>
+                    <h3 class="field-label">Identificación</h3>
                     <div class="field-row">
-                        <input class="field-input" type="text" id="idPaciente" data-i18n-ph="ph_id" placeholder="ID Paciente" required>
-                        <input class="field-input" type="number" id="edad" min="0" max="150" data-i18n-ph="ph_edad" placeholder="Edad" required>
+                        <div class="field-control">
+                            <label for="idPaciente">ID del paciente</label>
+                            <input class="field-input" type="text" id="idPaciente" required>
+                            <p class="field-error" id="idPacienteError" hidden></p>
+                        </div>
+                        <div class="field-control">
+                            <label for="edad">Edad (años)</label>
+                            <input class="field-input" type="number" id="edad" min="0" max="150" required>
+                            <p class="field-error" id="edadError" hidden></p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="section-divider"></div>
 
                 <div class="field-group">
-                    <label class="field-label" data-i18n="signos_vitales">Signos Vitales</label>
+                    <h3 class="field-label">Signos vitales</h3>
                     <div class="field-row">
-                        <input class="field-input" type="number" id="fc" min="20" max="300" data-i18n-ph="ph_fc" placeholder="FC (lpm)" required oninput="sync()">
-                        <input class="field-input" type="number" id="spo2" min="0" max="100" data-i18n-ph="ph_spo2" placeholder="SpO2 (%)" required oninput="sync()">
+                        <div class="field-control">
+                            <label for="fc">Frecuencia cardíaca (lpm)</label>
+                            <input class="field-input" type="number" id="fc" min="20" max="300" required>
+                            <p class="field-error" id="fcError" hidden></p>
+                        </div>
+                        <div class="field-control">
+                            <label for="spo2">Saturación de oxígeno (%)</label>
+                            <input class="field-input" type="number" id="spo2" min="0" max="100" required>
+                            <p class="field-error" id="spo2Error" hidden></p>
+                        </div>
                     </div>
                     <div class="field-row">
-                        <input class="field-input" type="number" id="pas" min="40" max="300" data-i18n-ph="ph_pas" placeholder="PAS (mmHg)" required oninput="sync()">
-                        <input class="field-input" type="number" id="pad" min="20" max="200" data-i18n-ph="ph_pad" placeholder="PAD (mmHg)" required oninput="sync()">
+                        <div class="field-control">
+                            <label for="pas">Presión sistólica (mmHg)</label>
+                            <input class="field-input" type="number" id="pas" min="40" max="300" required>
+                            <p class="field-error" id="pasError" hidden></p>
+                        </div>
+                        <div class="field-control">
+                            <label for="pad">Presión diastólica (mmHg)</label>
+                            <input class="field-input" type="number" id="pad" min="20" max="200" required>
+                            <p class="field-error" id="padError" hidden></p>
+                        </div>
                     </div>
                     <div class="field-row">
-                        <input class="field-input" type="number" id="temp" min="30" max="45" step="0.1" data-i18n-ph="ph_temp" placeholder="Temp (C)" required oninput="sync()">
-                        <select class="field-select" id="conciencia" required>
-                            <option value="Alerta" data-i18n="opt_alerta">A - Alerta</option>
-                            <option value="Verbal" data-i18n="opt_verbal">V - Verbal</option>
-                            <option value="Dolor" data-i18n="opt_dolor">D - Dolor</option>
-                            <option value="Inconsciente" data-i18n="opt_inconsciente">I - Inconsciente</option>
-                        </select>
+                        <div class="field-control">
+                            <label for="temp">Temperatura (°C)</label>
+                            <input class="field-input" type="number" id="temp" min="30" max="45" step="0.1" required>
+                            <p class="field-error" id="tempError" hidden></p>
+                        </div>
+                        <div class="field-control">
+                            <label for="conciencia">Nivel de conciencia</label>
+                            <select class="field-select" id="conciencia" required>
+                                <option value="Alerta">A - Alerta</option>
+                                <option value="Verbal">V - Responde a la voz</option>
+                                <option value="Dolor">D - Responde al dolor</option>
+                                <option value="Inconsciente">I - Sin respuesta</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
                 <div class="section-divider"></div>
 
                 <div class="field-group">
-                    <label class="field-label" data-i18n="sintomas">Sintomas</label>
+                    <h3 class="field-label">Síntomas</h3>
                     <div class="sintomas-list">
-                        <label class="sintoma-check"><select id="sx1" aria-label="Dolor torácico"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx1">Dolor toracico</span></label>
-                        <label class="sintoma-check"><select id="sx2" aria-label="Dificultad respiratoria"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx2">Dificultad respiratoria</span></label>
-                        <label class="sintoma-check"><select id="sx3" aria-label="Sangrado activo"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx3">Sangrado activo</span></label>
-                        <label class="sintoma-check"><select id="sx4" aria-label="Convulsiones"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx4">Convulsiones</span></label>
-                        <label class="sintoma-check"><select id="sx5" aria-label="Alteración de conducta"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx5">Alteracion de conducta</span></label>
-                        <label class="sintoma-check"><select id="sx6" aria-label="Trauma significativo"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx6">Trauma significativo</span></label>
-                        <label class="sintoma-check"><select id="sx7" aria-label="Dolor intenso"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select> <span data-i18n="sx7">Dolor intenso (EVA>=7)</span></label>
+                        <div class="sintoma-check"><label for="sx1">Dolor torácico</label><select class="field-select" id="sx1"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx2">Dificultad respiratoria</label><select class="field-select" id="sx2"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx3">Sangrado activo</label><select class="field-select" id="sx3"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx4">Convulsiones</label><select class="field-select" id="sx4"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx5">Alteración de conducta</label><select class="field-select" id="sx5"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx6">Trauma significativo</label><select class="field-select" id="sx6"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
+                        <div class="sintoma-check"><label for="sx7">Dolor intenso (EVA 7 o más)</label><select class="field-select" id="sx7"><option value="">No evaluado</option><option value="true">Presente</option><option value="false">Ausente</option></select></div>
                     </div>
                 </div>
                 <div class="section-divider"></div>
                 <div class="field-group">
-                    <label class="field-label">Síntomas adicionales · Ampliaciones</label>
+                    <h3 class="field-label">Síntomas adicionales · Ampliaciones</h3>
                     <p class="additional-intro">Seleccione presente, ausente o no evaluado. Las reglas base permanecen protegidas.</p>
-                    <div class="additional-catalog" id="additionalSymptoms" aria-live="polite">Cargando catálogo…</div>
+                    <div class="additional-catalog" id="additionalSymptoms">Cargando catálogo…</div>
                     <div class="catalog-actions"><button id="refreshCatalog" class="btn-secondary" type="button" aria-controls="additionalSymptoms" onclick="loadAdditionalSymptoms()">Actualizar catálogo</button>
                     <a class="knowledge-link" href="/conocimiento">Administrar síntomas →</a></div>
                     <p id="catalogStatus" class="catalog-status" role="status" aria-live="polite"></p>
@@ -858,8 +888,11 @@
             </form>
         </div>
         <div class="panel-footer">
-            <button class="btn-primary" id="btnEval" onclick="evaluar(event, true)" data-i18n="btn_eval">Evaluar Triaje</button>
-            <button id="btnSave" class="btn-secondary simulation-button" type="button" onclick="evaluar(event)">Guardar</button>
+            <button class="btn-primary" id="btnEval" type="submit" form="triageForm" data-i18n="btn_eval">Evaluar Triaje</button>
+            <button id="btnSave" class="btn-secondary simulation-button" type="button" onclick="evaluar(event)" lang="es">Guardar</button>
+            <p class="evaluation-status" id="evaluationStatus" role="status" lang="es"></p>
+            <p class="evaluation-error" id="evaluationError" role="alert" lang="es"></p>
+            <a class="action-link" id="viewResult" href="#resultSection" onclick="viewFormResult(); goToSection(event)" lang="es" hidden>Ver resultado</a>
         </div>
     </div>
 
@@ -867,14 +900,71 @@
     <div class="right-panel">
         <div class="dash-content">
 
+            <section class="result-section" id="resultSection" aria-labelledby="resNivel" lang="es" tabindex="-1">
+                <div class="result-banner" id="resBanner">
+                    <p class="result-patient" id="resultPatient"></p>
+                    <h2 class="result-nivel-big" id="resNivel">Prioridad local</h2>
+                    <p class="result-color-text" id="resColor"></p>
+                </div>
+                <div class="result-details">
+                    <div class="result-row">
+                        <h3 class="result-row-label">Recomendación</h3>
+                        <p class="result-row-value" id="resRecom"></p>
+                    </div>
+                    <div class="result-row">
+                        <h3 class="result-row-label">Por qué se asignó esta prioridad</h3>
+                        <p class="result-row-value" id="resMotivo"></p>
+                        <ul class="result-reasons" id="resultReasons" hidden></ul>
+                    </div>
+                    <div class="result-row" id="resAlertasRow" style="display:none">
+                        <h3 class="result-row-label">Signos de alarma</h3>
+                        <div class="alert-tags" id="resAlertas"></div>
+                    </div>
+                </div>
+                <p class="result-notice" id="simulationNotice" hidden>Simulación sin guardar.</p>
+                <p class="result-notice" id="incompleteNotice" hidden>Hay síntomas sin evaluar. La prioridad se basa en los datos conocidos.</p>
+                <p class="result-notice" id="staleNotice" hidden>El formulario cambió. Vuelva a evaluar para obtener el resultado con los datos actuales.</p>
+                <p class="scope-note result-scope">Prioridad local. Validación clínica pendiente.</p>
+                <a class="action-link" href="#formHeading" onclick="goToSection(event)">Volver al formulario</a>
+                <details class="reasoning" id="reasoningDetails" hidden>
+                    <summary>Auditoría técnica</summary>
+                    <p id="reasoningKnowledge"></p>
+                    <p>Los pesos de reglas y los indicadores de riesgo no son probabilidades clínicas calibradas.</p>
+                    <details class="audit-block">
+                        <summary>Reglas y traza de inferencia</summary>
+                        <ol id="reasoningSteps"></ol>
+                        <pre id="reasoningTrace"></pre>
+                    </details>
+                    <details class="audit-block">
+                        <summary>Hechos y procedencia</summary>
+                        <pre id="reasoningFacts"></pre>
+                    </details>
+                    <details class="audit-block" id="snapshotDetails">
+                        <summary>Snapshot del conocimiento</summary>
+                        <pre id="reasoningSnapshot"></pre>
+                    </details>
+                </details>
+            </section>
+
+            <section aria-labelledby="historyHeading">
+                <h2 id="historyHeading" class="field-label" data-i18n="historial">Historial de evaluaciones</h2>
+                <div class="history-strip" id="historyStrip">
+                    <p class="empty-hist" data-i18n="sin_evals">Sin evaluaciones registradas</p>
+                </div>
+                <p id="historyStatus" role="status" lang="es"></p>
+                <a class="action-link" id="viewHistoryResult" href="#resultSection" onclick="goToSection(event)" lang="es" hidden>Ver resultado seleccionado</a>
+            </section>
+
+            <details class="reasoning indicators" id="indicators" lang="es" ontoggle="updateECG()">
+                <summary>Indicadores del formulario</summary>
             <!-- Vital Signs Cards -->
             <div class="vitals-row">
                 <div class="vital-card" id="vc-fc" style="--vital-color: #ef4444">
                     <div class="vital-icon" style="background:rgba(239,68,68,0.1);color:#ef4444">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     </div>
-                    <div class="vital-label" data-i18n="v_fc">Frec. Cardiaca</div>
-                    <div class="vital-value" id="v-fc" style="color:#ef4444">--<span class="vital-unit">lpm</span></div>
+                    <div class="vital-label">Frecuencia cardíaca</div>
+                    <div class="vital-value" id="v-fc" style="color:#b91c1c">--<span class="vital-unit">lpm</span></div>
                     <div class="vital-range">60 - 100 lpm</div>
                     <div class="vital-bar-track"><div class="vital-bar-fill" id="b-fc" style="width:0;background:#ef4444"></div></div>
                 </div>
@@ -882,8 +972,8 @@
                     <div class="vital-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
                     </div>
-                    <div class="vital-label" data-i18n="v_spo2">Saturacion O2</div>
-                    <div class="vital-value" id="v-spo2" style="color:#3b82f6">--<span class="vital-unit">%</span></div>
+                    <div class="vital-label">Saturación de oxígeno</div>
+                    <div class="vital-value" id="v-spo2" style="color:#1d4ed8">--<span class="vital-unit">%</span></div>
                     <div class="vital-range">95 - 100 %</div>
                     <div class="vital-bar-track"><div class="vital-bar-fill" id="b-spo2" style="width:0;background:#3b82f6"></div></div>
                 </div>
@@ -891,8 +981,8 @@
                     <div class="vital-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17h2v-7H3v7zm4 0h2V7H7v10zm4 0h2V4h-2v13zm4 0h2v-9h-2v9zm4 0h2V2h-2v15z"/></svg>
                     </div>
-                    <div class="vital-label" data-i18n="v_pas">Presion Arterial</div>
-                    <div class="vital-value" id="v-pas" style="color:#8b5cf6">--/<span class="vital-unit">mmHg</span></div>
+                    <div class="vital-label">Presión arterial</div>
+                    <div class="vital-value" id="v-pas" style="color:#6d28d9">--/<span class="vital-unit">mmHg</span></div>
                     <div class="vital-range">90-140 / 60-90</div>
                     <div class="vital-bar-track"><div class="vital-bar-fill" id="b-pas" style="width:0;background:#8b5cf6"></div></div>
                 </div>
@@ -900,17 +990,17 @@
                     <div class="vital-icon" style="background:rgba(245,158,11,0.1);color:#f59e0b">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15 13V5c0-1.66-1.34-3-3-3S9 3.34 9 5v8c-1.21.91-2 2.37-2 4 0 2.76 2.24 5 5 5s5-2.24 5-5c0-1.63-.79-3.09-2-4zm-4-8c0-.55.45-1 1-1s1 .45 1 1h-1v1h1v2h-1v1h1v2h-2V5z"/></svg>
                     </div>
-                    <div class="vital-label" data-i18n="v_temp">Temperatura</div>
-                    <div class="vital-value" id="v-temp" style="color:#f59e0b">--<span class="vital-unit">C</span></div>
-                    <div class="vital-range">36.1 - 37.2 C</div>
+                    <div class="vital-label">Temperatura</div>
+                    <div class="vital-value" id="v-temp" style="color:#92400e">--<span class="vital-unit">°C</span></div>
+                    <div class="vital-range">36.1 - 37.2 °C</div>
                     <div class="vital-bar-track"><div class="vital-bar-fill" id="b-temp" style="width:0;background:#f59e0b"></div></div>
                 </div>
                 <div class="vital-card" id="vc-conc" style="--vital-color: #06b6d4">
                     <div class="vital-icon" style="background:rgba(6,182,212,0.1);color:#06b6d4">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
                     </div>
-                    <div class="vital-label" data-i18n="v_conc">Conciencia</div>
-                    <div class="vital-value" id="v-conc" style="color:#06b6d4;font-size:1rem;font-weight:600">A</div>
+                    <div class="vital-label">Conciencia</div>
+                    <div class="vital-value" id="v-conc" style="color:#0e7490;font-size:1rem;font-weight:600">A</div>
                     <div class="vital-range">AVDI</div>
                     <div class="vital-bar-track"><div class="vital-bar-fill" id="b-conc" style="width:100%;background:#06b6d4"></div></div>
                 </div>
@@ -920,8 +1010,8 @@
             <div class="ecg-strip">
                 <div class="ecg-header">
                     <div class="ecg-label-group">
-                        <span class="ecg-channel">ECG Lead II</span>
-                        <div class="ecg-live-badge"><div class="ecg-live-dot"></div><span data-i18n="live">Live</span></div>
+                        <span class="ecg-channel">Onda ilustrativa</span>
+                        <div class="ecg-live-badge"><div class="ecg-live-dot"></div><span>Simulada</span></div>
                     </div>
                     <div class="ecg-rate-display">
                         <span class="ecg-rate-num" id="ecgRate">72</span>
@@ -929,7 +1019,7 @@
                     </div>
                 </div>
                 <div class="ecg-canvas-area">
-                    <canvas id="ecgCanvas"></canvas>
+                    <canvas id="ecgCanvas" aria-hidden="true"></canvas>
                 </div>
             </div>
 
@@ -940,7 +1030,7 @@
                         <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
                         <path class="gauge-fill" id="g-fc" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#ef4444" stroke-dasharray="126" stroke-dashoffset="126" />
                         <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-fc-val">--</text>
-                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">lpm</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#4b5563" font-size="6" font-weight="500">lpm</text>
                     </svg>
                     <div class="gauge-label">FC</div>
                 </div>
@@ -949,7 +1039,7 @@
                         <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
                         <path class="gauge-fill" id="g-spo2" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#3b82f6" stroke-dasharray="126" stroke-dashoffset="126" />
                         <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-spo2-val">--</text>
-                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">%</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#4b5563" font-size="6" font-weight="500">%</text>
                     </svg>
                     <div class="gauge-label">SpO2</div>
                 </div>
@@ -958,7 +1048,7 @@
                         <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
                         <path class="gauge-fill" id="g-pas" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#8b5cf6" stroke-dasharray="126" stroke-dashoffset="126" />
                         <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-pas-val">--</text>
-                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">mmHg</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#4b5563" font-size="6" font-weight="500">mmHg</text>
                     </svg>
                     <div class="gauge-label">PAS</div>
                 </div>
@@ -967,55 +1057,17 @@
                         <path class="gauge-track" d="M10 55 A40 40 0 0 1 90 55" />
                         <path class="gauge-fill" id="g-temp" d="M10 55 A40 40 0 0 1 90 55" style="stroke:#f59e0b" stroke-dasharray="126" stroke-dashoffset="126" />
                         <text x="50" y="48" text-anchor="middle" fill="#111827" font-size="14" font-weight="700" id="g-temp-val">--</text>
-                        <text x="50" y="58" text-anchor="middle" fill="#9ca3af" font-size="6" font-weight="500">C</text>
+                        <text x="50" y="58" text-anchor="middle" fill="#4b5563" font-size="6" font-weight="500">C</text>
                     </svg>
                     <div class="gauge-label">Temp</div>
                 </div>
             </div>
 
-            <!-- Result -->
-            <div class="result-section" id="resultSection">
-                <div class="result-banner" id="resBanner">
-                    <div class="result-nivel-big" id="resNivel" data-i18n="nivel">Nivel --</div>
-                    <div class="result-color-text" id="resColor">--</div>
-                </div>
-                <div class="result-details">
-                    <p id="simulationNotice" hidden style="padding:12px;background:#e7f0fb;border-radius:8px">SIMULACIÓN · Este resultado no se ha guardado.</p>
-                    <p id="incompleteNotice" hidden style="padding:12px;background:#fff7ed;border-radius:8px;font-size:12px;line-height:1.6">Hay síntomas no evaluados. La prioridad se basa únicamente en los datos conocidos; complete la valoración profesional.</p>
-                    <div class="result-row">
-                        <div class="result-row-label" data-i18n="motivo">Motivo Clinico</div>
-                        <div class="result-row-value" id="resMotivo">--</div>
-                    </div>
-                    <div class="result-row" id="resAlertasRow" style="display:none">
-                        <div class="result-row-label" data-i18n="alarmas">Signos de Alarma</div>
-                        <div class="alert-tags" id="resAlertas"></div>
-                    </div>
-                    <div class="result-row">
-                        <div class="recom-box">
-                            <div class="result-row-label" data-i18n="recom">Recomendacion</div>
-                            <div class="result-row-value" id="resRecom">--</div>
-                        </div>
-                    </div>
-                </div>
-                <details class="reasoning" id="reasoningDetails" hidden>
-                    <summary>Cómo se obtuvo esta prioridad</summary>
-                    <ol id="reasoningSteps"></ol>
-                    <p id="reasoningKnowledge"></p>
-                    <p>Los pesos de reglas y los indicadores de riesgo no son probabilidades clínicas calibradas.</p>
-                </details>
-            </div>
-
-            <!-- History -->
-            <div>
-                <div class="field-label" style="margin-bottom:0.5rem" data-i18n="historial">Historial de Evaluaciones</div>
-                <div class="history-strip" id="historyStrip">
-                    <div class="empty-hist" data-i18n="sin_evals">Sin evaluaciones registradas</div>
-                </div>
-            </div>
+            </details>
 
         </div>
     </div>
-</div>
+</main>
 
 <script>
 // A local file or XAMPP preview cannot resolve the FastAPI routes.
@@ -1027,158 +1079,35 @@ if (typeof location !== 'undefined' && (location.protocol === 'file:' ||
 let LANG = localStorage.getItem('triaje_lang') || 'es';
 
 const I18N = {
-  es: {
-    app_title: 'Sistema de Triaje',
-    online: 'Online',
-    panel_title: 'Evaluacion de Paciente',
-    identificacion: 'Identificacion',
-    ph_id: 'ID Paciente',
-    ph_edad: 'Edad',
-    signos_vitales: 'Signos Vitales',
-    ph_fc: 'FC (lpm)',
-    ph_spo2: 'SpO2 (%)',
-    ph_pas: 'PAS (mmHg)',
-    ph_pad: 'PAD (mmHg)',
-    ph_temp: 'Temp (C)',
-    opt_alerta: 'A - Alerta',
-    opt_verbal: 'V - Verbal',
-    opt_dolor: 'D - Dolor',
-    opt_inconsciente: 'I - Inconsciente',
-    sintomas: 'Sintomas',
-    sx1: 'Dolor toracico',
-    sx2: 'Dificultad respiratoria',
-    sx3: 'Sangrado activo',
-    sx4: 'Convulsiones',
-    sx5: 'Alteracion de conducta',
-    sx6: 'Trauma significativo',
-    sx7: 'Dolor intenso (EVA>=7)',
-    btn_eval: 'Evaluar Triaje',
-    btn_proc: 'Procesando...',
-    v_fc: 'Frec. Cardiaca',
-    v_spo2: 'Saturacion O2',
-    v_pas: 'Presion Arterial',
-    v_temp: 'Temperatura',
-    v_conc: 'Conciencia',
-    live: 'Live',
-    motivo: 'Motivo Clinico',
-    alarmas: 'Signos de Alarma',
-    recom: 'Recomendacion',
-    historial: 'Historial de Evaluaciones',
-    sin_evals: 'Sin evaluaciones registradas',
-    nivel: 'Nivel',
-    rojo: 'Rojo',
-    naranja: 'Naranja',
-    amarillo: 'Amarillo',
-    verde: 'Verde',
-    azul: 'Azul',
-    f_id: 'ID Paciente',
-    f_edad: 'Edad',
-    f_fc: 'Frecuencia cardiaca',
-    f_spo2: 'Saturacion O2',
-    f_pas: 'Presion sistolica',
-    f_pad: 'Presion diastolica',
-    f_temp: 'Temperatura',
-    err_title: 'Datos incompletos o invalidos',
-    err_id_required: 'Ingrese el ID del paciente.',
-    err_required: 'Complete el campo: {f}.',
-    err_number: '{f} debe ser un numero valido.',
-    err_range: '{f} debe estar entre {min} y {max}.',
-    err_sep: '\n',
-    err_net: 'No se pudo conectar con el servidor: {m}',
-  },
-  qu: {
-    app_title: 'Triaje Systema',
-    online: 'Sami',
-    panel_title: "Ukuymanta Rikch'ay",
-    identificacion: 'Sutiyachay',
-    ph_id: 'Ukuq ID',
-    ph_edad: 'Pacha',
-    signos_vitales: "Sami Rikch'aykuna",
-    ph_fc: 'Yuyaynin (lpm)',
-    ph_spo2: "Sayk'a (%)",
-    ph_pas: 'PAS (mmHg)',
-    ph_pad: 'PAD (mmHg)',
-    ph_temp: "Q'uñiy (C)",
-    opt_alerta: 'A - Atiq',
-    opt_verbal: 'V - Rimasqoq',
-    opt_dolor: 'D - Nanmiq',
-    opt_inconsciente: 'I - Mana Yuyarqoq',
-    sintomas: 'Yarqaykuna',
-    sx1: "K'uchi nan",
-    sx2: 'Samanay tiksyay',
-    sx3: 'Wachuy awaq',
-    sx4: "Q'uñiy (chullpi)",
-    sx5: 'Yuyay tiksyay',
-    sx6: 'Hatun machuwanakuy',
-    sx7: 'Hatun nan (EVA>=7)',
-    btn_eval: "Triaje Rikch'ay",
-    btn_proc: 'Kallarikun...',
-    v_fc: 'Yuyaynin',
-    v_spo2: "Sayk'a (O2)",
-    v_pas: 'Wachu Sami',
-    v_temp: "Q'uñiy",
-    v_conc: 'Yuyay',
-    live: 'Awaq',
-    motivo: 'Yarqaynin Rimanakuy',
-    alarmas: "Yupaq Rikch'aykuna",
-    recom: 'Yupachiy',
-    historial: "Rikch'aykuna Ñawpaq",
-    sin_evals: "Mana Rikch'ay tiyaq",
-    nivel: 'Chimpa',
-    rojo: 'Puka',
-    naranja: "Q'illi",
-    amarillo: "Q'illu",
-    verde: "Q'umis",
-    azul: 'Anqas',
-    f_id: 'Ukuq ID',
-    f_edad: 'Pacha',
-    f_fc: 'Yuyaynin',
-    f_spo2: "Sayk'a",
-    f_pas: 'Wachu Sami',
-    f_pad: 'Wachu Sami (diastolica)',
-    f_temp: "Q'uñiy",
-    err_title: 'Mana huntachu manapas allinchu',
-    err_id_required: 'Ukuq ID churay.',
-    err_required: 'Huntachiy: {f}.',
-    err_number: '{f} yupay kachun.',
-    err_range: '{f} {min} y {max} ukhupi kachun.',
-    err_sep: '\n',
-    err_net: 'Mana servidorwan tupayta atinchu: {m}',
-  }
+    es: {
+        app_title: 'Sistema de Triaje', online: 'En línea',
+        panel_title: 'Evaluación del paciente', btn_eval: 'Evaluar triaje',
+        historial: 'Historial de evaluaciones', sin_evals: 'Sin evaluaciones registradas'
+    },
+    qu: {
+        app_title: 'Triaje Systema', online: 'Sami',
+        panel_title: "Ukuymanta Rikch’ay", btn_eval: "Triaje Rikch’ay",
+        historial: 'Rikch’aykuna Ñawpaq', sin_evals: 'Mana Rikch’ay tiyaq'
+    }
 };
 
-const COLOR_QU = { Rojo:'Puka', Naranja:"Q'illi", Amarillo:"Q'illu", Verde:"Q'umis", Azul:'Anqas' };
-
-function t(key) { return (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key; }
+function t(key) { return I18N[LANG][key] || I18N.es[key]; }
 
 function setLang(lang) {
-  const previousLang = LANG;
-  LANG = (lang === 'qu') ? 'qu' : 'es';
-  localStorage.setItem('triaje_lang', LANG);
-  document.documentElement.lang = LANG === 'qu' ? 'qu' : 'es';
-  applyI18n();
-  document.querySelectorAll('.lang-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === LANG);
-  });
-  if (previousLang !== LANG) transitionContent(document.getElementById('triageWorkspace'), false);
-}
-
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (k === 'nivel') {
-      // Preserve current level number if shown
-      const cur = el.textContent.match(/\d+/);
-      el.textContent = t('nivel') + (cur ? ' ' + cur[0] : ' --');
-    } else {
-      el.textContent = t(k);
-    }
-  });
-  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-    el.placeholder = t(el.getAttribute('data-i18n-ph'));
-  });
-  // Re-translate last result if present
-  if (lastResult) showResult(lastResult, true);
+    const previousLang = LANG;
+    LANG = lang === 'qu' ? 'qu' : 'es';
+    localStorage.setItem('triaje_lang', LANG);
+    document.documentElement.lang = LANG;
+    document.getElementById('translationNotice').hidden = LANG !== 'qu';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('.lang-btn').forEach(button => {
+        const active = button.dataset.lang === LANG;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+    if (previousLang !== LANG) transitionContent(document.getElementById('triageWorkspace'), false);
 }
 
 // ===================== CLOCK =====================
@@ -1217,32 +1146,22 @@ function getCardState(type, val) {
     return '';
 }
 
-function animateValue(el, target, isFloat) {
-    const current = parseFloat(el.textContent) || 0;
-    const diff = target - current;
-    if (Math.abs(diff) < 0.01) return;
-    let step = 0;
-    const steps = 18;
-    const id = setInterval(() => {
-        step++;
-        const t = step / steps;
-        const ease = 1 - Math.pow(1 - t, 3);
-        const v = current + diff * ease;
-        el.innerHTML = (isFloat ? v.toFixed(1) : Math.round(v)) + el.querySelector('.vital-unit').outerHTML;
-        if (step >= steps) clearInterval(id);
-    }, 16);
+function setVitalValue(id, value) {
+    const el = document.getElementById(id);
+    const suffix = el.querySelector('.vital-unit');
+    el.replaceChildren(value, suffix);
 }
 
 function sync() {
-    const fc = parseInt(document.getElementById('fc').value) || 0;
-    const spo2 = parseInt(document.getElementById('spo2').value) || 0;
-    const pas = parseInt(document.getElementById('pas').value) || 0;
+    const fc = parseInt(document.getElementById('fc').value, 10);
+    const spo2 = parseInt(document.getElementById('spo2').value, 10);
+    const pas = parseInt(document.getElementById('pas').value, 10);
     const pad = parseInt(document.getElementById('pad').value) || 0;
-    const temp = parseFloat(document.getElementById('temp').value) || 0;
+    const temp = parseFloat(document.getElementById('temp').value);
     const conc = document.getElementById('conciencia').value;
 
+    setVitalValue('v-fc', Number.isFinite(fc) ? String(fc) : '--');
     if (fc > 0) {
-        animateValue(document.getElementById('v-fc'), fc, false);
         document.getElementById('ecgRate').textContent = fc;
         const s = getCardState('fc', fc);
         document.getElementById('vc-fc').className = 'vital-card' + (s ? ' ' + s : '');
@@ -1251,24 +1170,24 @@ function sync() {
         document.getElementById('g-fc-val').textContent = fc;
         ecgBPM = fc;
     }
-    if (spo2 > 0) {
-        animateValue(document.getElementById('v-spo2'), spo2, false);
+    setVitalValue('v-spo2', Number.isFinite(spo2) ? String(spo2) : '--');
+    if (spo2 >= 0) {
         const s = getCardState('spo2', spo2);
         document.getElementById('vc-spo2').className = 'vital-card' + (s ? ' ' + s : '');
         document.getElementById('b-spo2').style.width = spo2 + '%';
         setGauge('g-spo2', spo2, 100, 'spo2');
         document.getElementById('g-spo2-val').textContent = spo2;
     }
+    setVitalValue('v-pas', (pas || '--') + '/' + (pad || '--'));
     if (pas > 0) {
-        document.getElementById('v-pas').innerHTML = pas + '/' + (pad || '--') + '<span class="vital-unit">mmHg</span>';
         const s = getCardState('pas', pas);
         document.getElementById('vc-pas').className = 'vital-card' + (s ? ' ' + s : '');
         document.getElementById('b-pas').style.width = Math.min(pas / 200 * 100, 100) + '%';
         setGauge('g-pas', pas, 200, 'pas');
         document.getElementById('g-pas-val').textContent = pas + '/' + (pad || '--');
     }
+    setVitalValue('v-temp', Number.isFinite(temp) ? temp.toFixed(1) : '--');
     if (temp > 0) {
-        animateValue(document.getElementById('v-temp'), temp, true);
         const s = getCardState('temp', temp);
         document.getElementById('vc-temp').className = 'vital-card' + (s ? ' ' + s : '');
         document.getElementById('b-temp').style.width = Math.min((temp - 30) / 15 * 100, 100) + '%';
@@ -1288,6 +1207,24 @@ const c = cvs.getContext('2d');
 let ecgBuf = [];
 let ecgBPM = 72;
 let ecgPhase = 0;
+let ecgFrame = null;
+const reducedMotion = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+reducedMotion?.addEventListener('change', updateECG);
+
+function updateECG() {
+    if (ecgFrame !== null) {
+        cancelAnimationFrame(ecgFrame);
+        ecgFrame = null;
+    }
+    if (!document.getElementById('indicators').open) return;
+    sync();
+    if (!reducedMotion?.matches) {
+        resizeCVS();
+        drawECG();
+    } else {
+        c.clearRect(0, 0, cvs.width, cvs.height);
+    }
+}
 
 function resizeCVS() {
     cvs.width = cvs.parentElement.clientWidth;
@@ -1337,9 +1274,8 @@ function drawECG() {
         c.fill();
     }
 
-    requestAnimationFrame(drawECG);
+    ecgFrame = requestAnimationFrame(drawECG);
 }
-drawECG();
 
 // ===================== API =====================
 let history = [];
@@ -1347,66 +1283,67 @@ let lastResult = null;
 
 // Reglas alineadas con la validacion del backend (models.py)
 const VALIDATION_RULES = [
-  { id: 'idPaciente', key: 'f_id',   type: 'text',  min: 1,   max: 50 },
-  { id: 'edad',       key: 'f_edad', type: 'int',   min: 0,   max: 150 },
-  { id: 'fc',         key: 'f_fc',   type: 'int',   min: 20,  max: 300 },
-  { id: 'spo2',       key: 'f_spo2', type: 'int',   min: 0,   max: 100 },
-  { id: 'pas',        key: 'f_pas',  type: 'int',   min: 40,  max: 300 },
-  { id: 'pad',        key: 'f_pad',  type: 'int',   min: 20,  max: 200 },
-  { id: 'temp',       key: 'f_temp', type: 'float', min: 30,  max: 45 },
+    { id: 'idPaciente', type: 'text', min: 1, max: 50 },
+    { id: 'edad', type: 'int', min: 0, max: 150 },
+    { id: 'fc', type: 'int', min: 20, max: 300 },
+    { id: 'spo2', type: 'int', min: 0, max: 100 },
+    { id: 'pas', type: 'int', min: 40, max: 300 },
+    { id: 'pad', type: 'int', min: 20, max: 200 },
+    { id: 'temp', type: 'float', min: 30, max: 45 }
 ];
 
-function clearFieldErrors() {
-  document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+let formRevision = 0;
+let formResult = null;
+let resultRevision = 0;
+
+function setFieldError(field, message) {
+    const error = document.getElementById(field.id + 'Error');
+    error.textContent = message;
+    error.hidden = !message;
+    field.classList.toggle('invalid', Boolean(message));
+    if (message) {
+        field.setAttribute('aria-invalid', 'true');
+        field.setAttribute('aria-describedby', error.id);
+    } else {
+        field.removeAttribute('aria-invalid');
+        field.removeAttribute('aria-describedby');
+    }
+}
+
+function formEdited(event) {
+    formRevision++;
+    if (event.target.getAttribute('aria-invalid') === 'true') setFieldError(event.target, '');
+    if (formResult) {
+        if (lastResult === formResult) document.getElementById('staleNotice').hidden = false;
+        const status = document.getElementById('evaluationStatus');
+        const message = 'Datos modificados. Vuelva a evaluar.';
+        if (!evaluationInProgress && status.textContent !== message) status.textContent = message;
+    }
+    if (document.getElementById('indicators').open) sync();
 }
 
 function validateForm() {
-  clearFieldErrors();
-  const errors = [];
-  let firstInvalid = null;
-
-  for (const rule of VALIDATION_RULES) {
-    const el = document.getElementById(rule.id);
-    const raw = (el.value || '').trim();
-    let invalid = false;
-
-    if (raw === '') {
-      errors.push(t('err_required').replace('{f}', t(rule.key)));
-      invalid = true;
-    } else if (rule.type === 'text') {
-      if (raw.length < rule.min || raw.length > rule.max) {
-        errors.push(t('err_range')
-          .replace('{f}', t(rule.key))
-          .replace('{min}', rule.min)
-          .replace('{max}', rule.max));
-        invalid = true;
-      }
-    } else {
-      const val = Number(raw.replace(',', '.'));
-      if (!Number.isFinite(val)) {
-        errors.push(t('err_number').replace('{f}', t(rule.key)));
-        invalid = true;
-      } else if (val < rule.min || val > rule.max) {
-        errors.push(t('err_range')
-          .replace('{f}', t(rule.key))
-          .replace('{min}', rule.min)
-          .replace('{max}', rule.max));
-        invalid = true;
-      }
+    const invalidFields = [];
+    for (const { id, type, min, max } of VALIDATION_RULES) {
+        const field = document.getElementById(id);
+        const raw = field.value.trim();
+        const value = Number(raw);
+        let message = '';
+        if (field.validity?.badInput) message = 'Ingrese un número válido.';
+        else if (!raw) message = 'Complete este campo.';
+        else if (type === 'text' && Array.from(raw).length > max) message = `Use como máximo ${max} caracteres.`;
+        else if (type !== 'text') {
+            if (!Number.isFinite(value)) message = 'Ingrese un número válido.';
+            else if (type === 'int' && !Number.isInteger(value)) message = 'Ingrese un número entero.';
+            else if (value < min || value > max) message = `Ingrese un valor entre ${min} y ${max}.`;
+        }
+        setFieldError(field, message);
+        if (message) invalidFields.push(field.labels[0].textContent);
     }
-
-    if (invalid) {
-      el.classList.add('invalid');
-      if (!firstInvalid) firstInvalid = el;
+    if (invalidFields.length) {
+        document.getElementById('evaluationError').textContent = 'Revise estos campos: ' + invalidFields.join(', ') + '.';
     }
-  }
-
-  if (firstInvalid) firstInvalid.focus();
-  return errors;
-}
-
-function showFormErrors(errors) {
-  alert(t('err_title') + ':\n\n- ' + errors.join('\n- '));
+    return !invalidFields.length;
 }
 
 function formatApiError(detail) {
@@ -1417,7 +1354,7 @@ function formatApiError(detail) {
     }).join('\n');
   }
   if (detail && typeof detail === 'object') return detail.msg || JSON.stringify(detail);
-  return String(detail || 'Error');
+  return String(detail || 'El servidor no devolvió detalles del error.');
 }
 
 function readBaseSymptom(id) { const value = document.getElementById(id).value; return value === 'true' ? true : value === 'false' ? false : null; }
@@ -1451,7 +1388,6 @@ async function loadAdditionalSymptoms() {
             const select = document.createElement('select');
             select.className = 'field-select';
             select.dataset.symptom = symptom.id;
-            select.setAttribute('aria-label', symptom.nombre);
             for (const [value, text] of [['', 'No evaluado'], ['true', 'Presente'], ['false', 'Ausente']]) {
                 const option = document.createElement('option');
                 option.value = value; option.textContent = text; select.append(option);
@@ -1485,81 +1421,103 @@ async function evaluar(e, simulacion = false) {
     if (e) e.preventDefault();
     if (evaluationInProgress) return;
 
-    const errors = validateForm();
-    if (errors.length) { showFormErrors(errors); return; }
+    const status = document.getElementById('evaluationStatus');
+    const error = document.getElementById('evaluationError');
+    error.textContent = '';
+    status.textContent = '';
+    if (!validateForm()) return;
 
-    const btn = document.getElementById('btnEval');
-    const saveButton = document.getElementById('btnSave');
+    const buttons = [document.getElementById('btnEval'), document.getElementById('btnSave')];
     evaluationInProgress = true;
-    btn.disabled = true;
-    saveButton.disabled = true;
-    btn.textContent = t('btn_proc');
-    saveButton.textContent = simulacion ? 'Guardar' : 'Guardando…';
+    for (const button of buttons) button.setAttribute('aria-disabled', 'true');
+    status.textContent = simulacion ? 'Evaluando triaje…' : 'Guardando evaluación…';
 
-    if (!additionalSymptomsReady) {
-        await loadAdditionalSymptoms();
-        if (!additionalSymptomsReady) {
-            evaluationInProgress = false;
-            btn.disabled = false;
-            saveButton.disabled = false;
-            btn.textContent = t('btn_eval');
-            saveButton.textContent = 'Guardar';
-            alert(document.getElementById('catalogStatus').textContent);
-            return;
-        }
-    }
-
-    const num = id => Number((document.getElementById(id).value || '').trim().replace(',', '.'));
-
-    const body = {
-        id_paciente: document.getElementById('idPaciente').value.trim(),
-        edad: Math.trunc(num('edad')),
-        idioma: LANG,
-        signos_vitales: {
-            frecuencia_cardiaca: Math.trunc(num('fc')),
-            presion_sistolica: Math.trunc(num('pas')),
-            presion_diastolica: Math.trunc(num('pad')),
-            temperatura: num('temp'),
-            saturacion_oxigeno: Math.trunc(num('spo2'))
-        },
-        sintomas_adicionales: Object.fromEntries(Array.from(document.querySelectorAll('#additionalSymptoms select[data-symptom]'), el => [el.dataset.symptom, el.value === '' ? null : el.value === 'true'])),
-        nivel_conciencia: document.getElementById('conciencia').value,
-        sintomas: {
-            dolor_toracico: readBaseSymptom('sx1'),
-            dificultad_respiratoria: readBaseSymptom('sx2'),
-            sangrado_activo: readBaseSymptom('sx3'),
-            convulsiones: readBaseSymptom('sx4'),
-            alteracion_conducta: readBaseSymptom('sx5'),
-            trauma_significativo: readBaseSymptom('sx6'),
-            dolor_intenso: readBaseSymptom('sx7')
-        }
-    };
-
-    if (!simulacion) {
-        const fingerprint = JSON.stringify(body);
-        if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint) {
-            pendingSubmission = { fingerprint, id: crypto.randomUUID() };
-        }
-        body.id_solicitud = pendingSubmission.id;
-    }
     try {
+        if (!additionalSymptomsReady) {
+            await loadAdditionalSymptoms();
+            if (!additionalSymptomsReady) {
+                error.textContent = document.getElementById('catalogStatus').textContent;
+                return;
+            }
+            if (!validateForm()) return;
+        }
+        const submittedRevision = formRevision;
+        const num = id => Number(document.getElementById(id).value);
+
+        // The clinical UI uses the Spanish source texts in both interface languages.
+        const body = {
+            id_paciente: document.getElementById('idPaciente').value.trim(),
+            edad: num('edad'),
+            idioma: 'es',
+            signos_vitales: {
+                frecuencia_cardiaca: num('fc'),
+                presion_sistolica: num('pas'),
+                presion_diastolica: num('pad'),
+                temperatura: num('temp'),
+                saturacion_oxigeno: num('spo2')
+            },
+            sintomas_adicionales: Object.fromEntries(Array.from(document.querySelectorAll('#additionalSymptoms select[data-symptom]'), el => [el.dataset.symptom, el.value === '' ? null : el.value === 'true'])),
+            nivel_conciencia: document.getElementById('conciencia').value,
+            sintomas: {
+                dolor_toracico: readBaseSymptom('sx1'),
+                dificultad_respiratoria: readBaseSymptom('sx2'),
+                sangrado_activo: readBaseSymptom('sx3'),
+                convulsiones: readBaseSymptom('sx4'),
+                alteracion_conducta: readBaseSymptom('sx5'),
+                trauma_significativo: readBaseSymptom('sx6'),
+                dolor_intenso: readBaseSymptom('sx7')
+            }
+        };
+
+        if (!simulacion) {
+            const fingerprint = JSON.stringify(body);
+            if (!pendingSubmission || pendingSubmission.fingerprint !== fingerprint) {
+                pendingSubmission = { fingerprint, id: crypto.randomUUID() };
+            }
+            body.id_solicitud = pendingSubmission.id;
+        }
         const r = await fetch(simulacion ? '/triaje/simular' : '/triaje', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
         if (!r.ok) {
             let detail = null;
             try { detail = (await r.json()).detail; } catch (_) {}
-            alert('Error: ' + formatApiError(detail));
+            error.textContent = 'No se pudo completar la evaluación. ' + formatApiError(detail);
             return;
         }
         const d = await r.json();
-        lastResult = d;
+        formResult = d;
+        resultRevision = submittedRevision;
+        document.getElementById('historyStatus').textContent = '';
+        document.getElementById('viewHistoryResult').hidden = true;
         showResult(d);
-        if (simulacion) { alert('Simulación completada: no se guardó ningún paciente ni evaluación.'); }
-        else { pushHistory(d); pendingSubmission = null; }
-    } catch(err) { alert(t('err_net').replace('{m}', err.message)); }
-    finally {
+        document.getElementById('viewResult').hidden = false;
+        if (!simulacion) {
+            pushHistory(d);
+            pendingSubmission = null;
+        }
+        status.textContent = (simulacion ? 'Simulación lista.' : 'Evaluación guardada.') +
+            ` Prioridad local ${d.nivel_prioridad}. ` +
+            (formRevision === submittedRevision ? 'Use «Ver resultado» para consultarla.' : 'El formulario cambió durante la evaluación.');
+    } catch (err) {
+        error.textContent = 'No se pudo completar la solicitud. ' + err.message;
+    } finally {
         evaluationInProgress = false;
-        btn.disabled = false; btn.textContent = t('btn_eval');
-        saveButton.disabled = false; saveButton.textContent = 'Guardar';
+        for (const button of buttons) button.removeAttribute('aria-disabled');
+        if (error.textContent) status.textContent = '';
+    }
+}
+
+function goToSection(event) {
+    event.preventDefault();
+    const section = document.getElementById(event.currentTarget.hash.slice(1));
+    section.focus({ preventScroll: true });
+    section.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+
+function viewFormResult() {
+    if (formResult && formResult !== lastResult) {
+        document.getElementById('historyStatus').textContent = '';
+        document.getElementById('viewHistoryResult').hidden = true;
+        showResult(formResult);
     }
 }
 
@@ -1577,22 +1535,22 @@ function transitionContent(element, slide = true) {
 }
 
 const bgMap = { 1:'#fef2f2', 2:'#fff7ed', 3:'#fefce8', 4:'#f0fdf4', 5:'#eff6ff' };
-const txMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#2563eb' };
+const txMap = { 1:'#991b1b', 2:'#9a3412', 3:'#854d0e', 4:'#166534', 5:'#1e40af' };
 const dotMap = { 1:'#dc2626', 2:'#ea580c', 3:'#ca8a04', 4:'#16a34a', 5:'#3b82f6' };
 
-function showResult(d, silent) {
+function showResult(d) {
+    const changed = lastResult !== d;
+    lastResult = d;
     document.getElementById('incompleteNotice').hidden = !d.metadata_motor?.sintomas_no_evaluados?.length;
     document.getElementById('simulationNotice').hidden = !d.metadata_motor?.simulacion;
+    document.getElementById('staleNotice').hidden = d !== formResult || resultRevision === formRevision;
     const sec = document.getElementById('resultSection');
+    document.getElementById('resultPatient').textContent = 'Paciente ' + d.id_paciente;
     document.getElementById('resBanner').style.background = bgMap[d.nivel_prioridad];
-    document.getElementById('resNivel').textContent = t('nivel') + ' ' + d.nivel_prioridad;
+    document.getElementById('resNivel').textContent = 'Prioridad local ' + d.nivel_prioridad;
     document.getElementById('resNivel').style.color = txMap[d.nivel_prioridad];
-    // Color: backend already translates when idioma=qu; fallback to local dict
-    let colorTxt = d.color;
-    if (LANG === 'qu' && COLOR_QU[d.color]) colorTxt = COLOR_QU[d.color];
-    document.getElementById('resColor').textContent = colorTxt;
+    document.getElementById('resColor').textContent = d.color;
     document.getElementById('resColor').style.color = txMap[d.nivel_prioridad];
-    document.getElementById('resMotivo').textContent = d.motivo_clinico;
     document.getElementById('resRecom').textContent = d.recomendacion;
 
     const ar = document.getElementById('resAlertasRow');
@@ -1605,33 +1563,112 @@ function showResult(d, silent) {
             tag.textContent = a;
             return tag;
         }));
-    } else ar.style.display = 'none';
+    } else {
+        ar.style.display = 'none';
+        al.replaceChildren();
+    }
 
+    renderReasons(d);
     renderReasoning(d);
-    if (!silent) {
-        lastResult = d;
-        sec.classList.add('visible');
+    updateHistorySelection();
+    sec.classList.add('visible');
+    if (changed) {
+        const audit = document.getElementById('reasoningDetails');
+        audit.open = false;
+        audit.querySelectorAll('details[open]').forEach(panel => { panel.open = false; });
         transitionContent(sec);
+    }
+}
+
+const OBSERVATION_LABELS = {
+    fc: ['Frecuencia cardíaca', 'lpm'], spo2: ['Saturación de oxígeno', '%'],
+    pas: ['Presión sistólica', 'mmHg'], pad: ['Presión diastólica', 'mmHg'],
+    temp: ['Temperatura', '°C'], edad: ['Edad', 'años'],
+    conciencia: ['Nivel de conciencia'],
+    convulsiones: ['Convulsiones'], dolor_toracico: ['Dolor en el pecho'],
+    dificultad_respiratoria: ['Dificultad para respirar'], sangrado_activo: ['Sangrado activo'],
+    alteracion_conducta: ['Cambios de conducta'], trauma_significativo: ['Lesión importante'],
+    dolor_intenso: ['Dolor intenso'], num_alteraciones_vitales: ['Signos vitales fuera de los rangos del sistema'],
+    recursos_orientativos: ['Recursos que el sistema estimó como orientativos']
+};
+const CONSCIOUSNESS_LABELS = {
+    Alerta: 'alerta', Verbal: 'responde a la voz', Dolor: 'responde al dolor', Inconsciente: 'sin respuesta'
+};
+
+function describeReason(reason) {
+    if (!reason.evidencia?.length) return reason.razon;
+    const observations = new Map();
+    for (const { hecho, actual } of reason.evidencia) {
+        if (!Object.hasOwn(OBSERVATION_LABELS, hecho)) return reason.razon;
+        const [label, unit] = OBSERVATION_LABELS[hecho];
+        let value = actual;
+        if (typeof actual === 'boolean') value = actual ? 'sí' : 'no';
+        if (hecho === 'conciencia') value = CONSCIOUSNESS_LABELS[actual] ?? actual;
+        if (unit) value = `${actual} ${unit}`;
+        observations.set(hecho, `${label}: ${value}`);
+    }
+    return Array.from(observations.values()).join(' · ');
+}
+
+function renderReasons(d) {
+    const explanation = d.metadata_motor?.explicaciones;
+    const traceMatches = explanation?.how?.nivel_asignado === undefined ||
+        explanation.how.nivel_asignado === d.nivel_prioridad;
+    const reasons = traceMatches ? (explanation?.why ?? []).map(describeReason).filter(Boolean) : [];
+    const list = document.getElementById('resultReasons');
+    list.hidden = !reasons.length;
+    list.replaceChildren(...reasons.map(reason => {
+        const item = document.createElement('li');
+        item.textContent = reason;
+        return item;
+    }));
+    const summary = document.getElementById('resMotivo');
+    if (!reasons.length) {
+        summary.textContent = traceMatches && d.motivo_clinico
+            ? 'Motivo registrado: ' + d.motivo_clinico
+            : 'La explicación de esta evaluación no está disponible.';
+    } else {
+        summary.textContent = explanation.why.every(reason => !reason.evidencia?.length)
+            ? 'Según los datos de esta evaluación:'
+            : 'Estas observaciones determinaron la prioridad según las reglas locales:';
     }
 }
 
 function renderReasoning(d) {
     const details = document.getElementById('reasoningDetails');
     const steps = document.getElementById('reasoningSteps');
-    const knowledge = document.getElementById('reasoningKnowledge');
     const explanation = d.metadata_motor?.explicaciones;
-    const trace = explanation?.trace || [];
+    const trace = explanation?.trace ?? d.metadata_motor?.traza_completa ?? [];
     const active = trace.filter(step => step.activa);
-    details.hidden = active.length === 0;
+    const source = explanation?.conocimiento ?? d.metadata_motor?.conocimiento;
+    const engine = explanation?.version_motor ?? d.metadata_motor?.version_motor;
+    const audit = [
+        d.metadata_motor?.id_evaluacion && `Evaluación ${d.metadata_motor.id_evaluacion}`,
+        engine && `Motor ${engine}`,
+        source?.version && `Base ${source.version}`,
+        source?.sha256 && `SHA-256 ${source.sha256}`
+    ].filter(Boolean);
+    details.hidden = !trace.length && !audit.length;
+    document.getElementById('reasoningKnowledge').textContent = audit.join(' · ');
     steps.replaceChildren(...active.map(step => {
         const item = document.createElement('li');
-        const evidence = (step.condiciones_evaluadas || []).map(c =>
-            `${c.hecho}: ${c.actual} (${c.operador} ${JSON.stringify(c.esperado)})`).join('; ');
-        item.textContent = `${step.regla_id}${step.decisiva ? ' · decisiva' : ''} · paso ${step.iteracion}: ${step.conclusion}${evidence ? ' — ' + evidence : ''}`;
+        item.textContent = `${step.regla_id}${step.decisiva ? ' · decisiva' : ''} · paso ${step.iteracion}: ${step.conclusion}`;
         return item;
     }));
-    const source = explanation?.conocimiento;
-    knowledge.textContent = source ? `Base ${source.version} · SHA-256 ${source.sha256} · validación clínica pendiente` : '';
+    document.getElementById('reasoningTrace').textContent = JSON.stringify({ how: explanation?.how, trace }, null, 2);
+    document.getElementById('reasoningFacts').textContent = JSON.stringify({
+        hechos: explanation?.hechos_finales,
+        procedencia: explanation?.procedencia_hechos
+    }, null, 2);
+    document.getElementById('snapshotDetails').hidden = !source?.snapshot;
+    document.getElementById('reasoningSnapshot').textContent = source?.snapshot ? JSON.stringify(source.snapshot, null, 2) : '';
+}
+
+function updateHistorySelection() {
+    const buttons = document.getElementById('historyStrip').children;
+    history.forEach((result, index) => {
+        buttons[index]?.setAttribute('aria-pressed', String(result === lastResult));
+    });
 }
 
 function pushHistory(d) {
@@ -1642,12 +1679,24 @@ function pushHistory(d) {
 
 function renderHistory() {
     const el = document.getElementById('historyStrip');
-    if (!history.length) { el.innerHTML = '<div class="empty-hist">' + t('sin_evals') + '</div>'; return; }
+    if (!history.length) {
+        const empty = document.createElement('p');
+        empty.className = 'empty-hist';
+        empty.setAttribute('data-i18n', 'sin_evals');
+        empty.textContent = t('sin_evals');
+        el.replaceChildren(empty);
+        return;
+    }
     el.replaceChildren(...history.map(h => {
         const chip = document.createElement('button');
         chip.type = 'button';
         chip.className = 'history-chip';
-        chip.addEventListener('click', () => showResult(h));
+        chip.lang = 'es';
+        chip.addEventListener('click', () => {
+            showResult(h);
+            document.getElementById('viewHistoryResult').hidden = false;
+            document.getElementById('historyStatus').textContent = `Resultado seleccionado. Paciente ${h.id_paciente}, prioridad local ${h.nivel_prioridad}.`;
+        });
         const dot = document.createElement('span');
         dot.className = 'history-chip-dot';
         dot.style.background = dotMap[h.nivel_prioridad];
@@ -1658,10 +1707,11 @@ function renderHistory() {
         badge.className = 'history-chip-badge';
         badge.style.color = txMap[h.nivel_prioridad];
         badge.style.background = dotMap[h.nivel_prioridad] + '18';
-        badge.textContent = 'N' + h.nivel_prioridad;
+        badge.textContent = 'Prioridad ' + h.nivel_prioridad;
         chip.append(dot, id, badge);
         return chip;
     }));
+    updateHistorySelection();
 }
 
 // Restore the language after all result state and rendering helpers are initialized.
