@@ -147,8 +147,8 @@ test('plain explanation uses only the decisive observations, preserving ties and
   vm.runInContext('showResult(result)', scope);
   const reasons = nodes.get('resultReasons').children.map(item => item.textContent);
   assert.deepEqual(reasons, ['Dificultad para respirar: sí · Saturación de oxígeno: 92 %', 'Texto de ampliación']);
-  assert.match(nodes.get('reasoningTrace').textContent, /R042/);
-  assert.match(nodes.get('reasoningFacts').textContent, /spo2/);
+  assert.match(nodes.get('reasoningTrace').textContent, /se activaron 1/);
+  assert.match(nodes.get('reasoningFacts').children[0].textContent, /Saturación de oxígeno: 92 %/);
   assert.match(nodes.get('reasoningSnapshot').textContent, /4.0.0/);
 
   scope.result.nivel_prioridad = 5;
@@ -343,4 +343,33 @@ test('local file and Apache previews redirect to the running app', () => {
   let redirected=false;
   vm.runInNewContext(bootstrap,{location:{protocol:'http:',hostname:'localhost',port:'8000',replace(){redirected=true;}}});
   assert.equal(redirected,false);
+});
+
+
+test('reasoning panels explain conditions and origins without rendering JSON or rule identifiers', () => {
+  const {scope,nodes}=context();
+  scope.result={id_paciente:'PLAIN-1',nivel_prioridad:3,color:'Amarillo',metadata_motor:{simulacion:true,explicaciones:{
+    how:{nivel_asignado:3},
+    trace:[{regla_id:'H002',activa:true,iteracion:1,hechos_producidos:{fc_alterada:true},
+      condiciones_evaluadas:[{hecho:'fc',actual:130,operador:'>',esperado:120,presente:true}]},
+      {regla_id:'R020',activa:true,decisiva:true,nivel:3,iteracion:2,conclusion:'Se detectaron varias alteraciones.',
+      condiciones_evaluadas:[{hecho:'num_alteraciones_vitales',actual:2,operador:'>=',esperado:2,presente:true}]}],
+    hechos_finales:{fc:130,fc_alterada:true,num_alteraciones_vitales:1},
+    procedencia_hechos:{fc:{reglas:[]},fc_alterada:{reglas:['H002']},num_alteraciones_vitales:{hechos:['fc_alterada'],reglas:['H002']}},
+    conocimiento:{version:'4.0.0',sha256:'private-technical-hash',snapshot:{version:'4.0.0',reglas:[{id:'H002'},{id:'R020'}],respaldo:{id:'R999'},entradas_adicionales:[]}}
+  }}};
+  vm.runInContext('showResult(result)',scope);
+  const steps=nodes.get('reasoningSteps').children.map(n=>n.textContent).join(' ');
+  const facts=nodes.get('reasoningFacts').children.map(n=>n.textContent).join(' ');
+  assert.match(steps,/mayor que 120 lpm/);
+  assert.match(steps,/determinó la prioridad local 3/);
+  assert.match(facts,/dato registrado en el formulario/);
+  assert.match(facts,/conclusión del motor/);
+  assert.match(facts,/Se obtuvo al contar/);
+  assert.match(nodes.get('reasoningSnapshot').textContent,/3 reglas/);
+  assert.match(nodes.get('reasoningSnapshot').textContent,/aunque el conocimiento se modifique/);
+  for(const text of [steps,facts,nodes.get('reasoningTrace').textContent,nodes.get('reasoningKnowledge').textContent,nodes.get('reasoningSnapshot').textContent]){
+    assert.doesNotMatch(text, /H002|R020|private-technical-hash|"hechos"|"trace"|"snapshot"/);
+  }
+  assert.doesNotMatch(html,/Simulación sin guardar|id="simulationNotice"|<pre id="reasoning/);
 });

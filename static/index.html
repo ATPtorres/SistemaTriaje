@@ -921,7 +921,6 @@
                         <div class="alert-tags" id="resAlertas"></div>
                     </div>
                 </div>
-                <p class="result-notice" id="simulationNotice" hidden>Simulación sin guardar.</p>
                 <p class="result-notice" id="incompleteNotice" hidden>Hay síntomas sin evaluar. La prioridad se basa en los datos conocidos.</p>
                 <p class="result-notice" id="staleNotice" hidden>El formulario cambió. Vuelva a evaluar para obtener el resultado con los datos actuales.</p>
                 <p class="scope-note result-scope">Prioridad local. Validación clínica pendiente.</p>
@@ -931,17 +930,17 @@
                     <p id="reasoningKnowledge"></p>
                     <p>Los pesos de reglas y los indicadores de riesgo no son probabilidades clínicas calibradas.</p>
                     <details class="audit-block">
-                        <summary>Reglas y traza de inferencia</summary>
+                        <summary>Cómo se aplicaron las reglas</summary>
                         <ol id="reasoningSteps"></ol>
-                        <pre id="reasoningTrace"></pre>
+                        <p id="reasoningTrace"></p>
                     </details>
                     <details class="audit-block">
-                        <summary>Hechos y procedencia</summary>
-                        <pre id="reasoningFacts"></pre>
+                        <summary>Datos utilizados y su origen</summary>
+                        <ul id="reasoningFacts" style="padding-left:1.25rem;margin-top:.75rem"></ul>
                     </details>
                     <details class="audit-block" id="snapshotDetails">
-                        <summary>Snapshot del conocimiento</summary>
-                        <pre id="reasoningSnapshot"></pre>
+                        <summary>Conocimiento utilizado en esta evaluación</summary>
+                        <p id="reasoningSnapshot"></p>
                     </details>
                 </details>
             </section>
@@ -1494,7 +1493,7 @@ async function evaluar(e, simulacion = false) {
             pushHistory(d);
             pendingSubmission = null;
         }
-        status.textContent = (simulacion ? 'Simulación lista.' : 'Evaluación guardada.') +
+        status.textContent = (simulacion ? 'Evaluación lista.' : 'Evaluación guardada.') +
             ` Prioridad local ${d.nivel_prioridad}. ` +
             (formRevision === submittedRevision ? 'Use «Ver resultado» para consultarla.' : 'El formulario cambió durante la evaluación.');
     } catch (err) {
@@ -1542,7 +1541,6 @@ function showResult(d) {
     const changed = lastResult !== d;
     lastResult = d;
     document.getElementById('incompleteNotice').hidden = !d.metadata_motor?.sintomas_no_evaluados?.length;
-    document.getElementById('simulationNotice').hidden = !d.metadata_motor?.simulacion;
     document.getElementById('staleNotice').hidden = d !== formResult || resultRevision === formRevision;
     const sec = document.getElementById('resultSection');
     document.getElementById('resultPatient').textContent = 'Paciente ' + d.id_paciente;
@@ -1634,34 +1632,110 @@ function renderReasons(d) {
     }
 }
 
+const DERIVED_LABELS = {
+    fc_alterada: 'Frecuencia cardíaca fuera del rango de las reglas locales',
+    pas_alterada: 'Presión sistólica fuera del rango de las reglas locales',
+    spo2_alterada: 'Saturación de oxígeno fuera del rango de las reglas locales',
+    temp_alterada: 'Temperatura fuera del rango de las reglas locales',
+    recurso_dificultad_respiratoria: 'Recurso orientativo por dificultad para respirar',
+    recurso_dolor_toracico: 'Recurso orientativo por dolor en el pecho',
+    recurso_fc_alterada: 'Recurso orientativo por frecuencia cardíaca alterada',
+    recurso_fiebre: 'Recurso orientativo por fiebre',
+    recurso_sangrado_activo: 'Recurso orientativo por sangrado',
+    recurso_spo2_alterada: 'Recurso orientativo por saturación de oxígeno alterada',
+    recurso_trauma_significativo: 'Recurso orientativo por lesión importante'
+};
+
+function factLabel(name, snapshot) {
+    if (OBSERVATION_LABELS[name]) return OBSERVATION_LABELS[name][0];
+    if (DERIVED_LABELS[name]) return DERIVED_LABELS[name];
+    if (name.startsWith('sx_')) {
+        const rule = snapshot?.reglas?.find(r => r.condiciones?.some(c => c.hecho === name));
+        return rule?.nombre || 'Síntoma adicional de esta evaluación';
+    }
+    return name.replaceAll('_', ' ');
+}
+
+function factValue(name, value) {
+    if (value === null || value === undefined) return 'no evaluado';
+    if (typeof value === 'boolean') return value ? 'presente' : 'ausente';
+    if (name === 'conciencia') return CONSCIOUSNESS_LABELS[value] || String(value);
+    const unit = OBSERVATION_LABELS[name]?.[1];
+    return String(value) + (unit ? ' ' + unit : '');
+}
+
+function explainCondition(condition, snapshot) {
+    const name = factLabel(condition.hecho, snapshot);
+    if (condition.presente === false) return name + ': no se registró este dato.';
+    const actual = factValue(condition.hecho, condition.actual);
+    if (typeof condition.esperado === 'boolean' || condition.esperado === undefined) return name + ': ' + actual;
+    const comparisons = {'<':'menor que', '<=':'menor o igual que', '>':'mayor que', '>=':'mayor o igual que', '==':'igual a', '!=':'diferente de', 'in':'uno de los siguientes valores:'};
+    const expected = Array.isArray(condition.esperado)
+        ? condition.esperado.map(value => factValue(condition.hecho, value)).join(', ')
+        : factValue(condition.hecho, condition.esperado);
+    return name + ': ' + actual + ' (criterio: ' + (comparisons[condition.operador] || 'comparación con') + ' ' + expected + ')';
+}
+
 function renderReasoning(d) {
     const details = document.getElementById('reasoningDetails');
     const steps = document.getElementById('reasoningSteps');
+    const factsList = document.getElementById('reasoningFacts');
     const explanation = d.metadata_motor?.explicaciones;
     const trace = explanation?.trace ?? d.metadata_motor?.traza_completa ?? [];
     const active = trace.filter(step => step.activa);
     const source = explanation?.conocimiento ?? d.metadata_motor?.conocimiento;
-    const engine = explanation?.version_motor ?? d.metadata_motor?.version_motor;
-    const audit = [
-        d.metadata_motor?.id_evaluacion && `Evaluación ${d.metadata_motor.id_evaluacion}`,
-        engine && `Motor ${engine}`,
-        source?.version && `Base ${source.version}`,
-        source?.sha256 && `SHA-256 ${source.sha256}`
-    ].filter(Boolean);
-    details.hidden = !trace.length && !audit.length;
-    document.getElementById('reasoningKnowledge').textContent = audit.join(' · ');
-    steps.replaceChildren(...active.map(step => {
+    const snapshot = source?.snapshot;
+    const version = source?.version ?? snapshot?.version;
+    details.hidden = !trace.length && !source;
+    steps.replaceChildren();
+    factsList.replaceChildren();
+    document.getElementById('reasoningKnowledge').textContent = version
+        ? 'La evaluación utilizó la base de conocimiento versión ' + version + '. A continuación se explica cómo se llegó al resultado.'
+        : 'A continuación se explica el razonamiento conservado para esta evaluación.';
+    const matching = explanation?.how?.nivel_asignado === undefined || explanation.how.nivel_asignado === d.nivel_prioridad;
+    for (const step of matching ? active : []) {
+        const observations = (step.condiciones_evaluadas || []).map(c => explainCondition(c, snapshot));
+        const effects = Object.keys(step.hechos_producidos || {}).map(name => factLabel(name, snapshot));
+        const outcome = step.decisiva
+            ? 'Esta regla determinó la prioridad local ' + d.nivel_prioridad + '.'
+            : step.nivel != null ? 'Propuso la prioridad local ' + step.nivel + '; se conservó la más urgente entre las reglas activadas.'
+            : 'Aportó información para continuar el razonamiento.';
         const item = document.createElement('li');
-        item.textContent = `${step.regla_id}${step.decisiva ? ' · decisiva' : ''} · paso ${step.iteracion}: ${step.conclusion}`;
-        return item;
-    }));
-    document.getElementById('reasoningTrace').textContent = JSON.stringify({ how: explanation?.how, trace }, null, 2);
-    document.getElementById('reasoningFacts').textContent = JSON.stringify({
-        hechos: explanation?.hechos_finales,
-        procedencia: explanation?.procedencia_hechos
-    }, null, 2);
-    document.getElementById('snapshotDetails').hidden = !source?.snapshot;
-    document.getElementById('reasoningSnapshot').textContent = source?.snapshot ? JSON.stringify(source.snapshot, null, 2) : '';
+        item.textContent = (observations.length ? observations.join('; ') + '. ' : '') +
+            (effects.length ? 'Se dedujo: ' + effects.join('; ') + '. ' : (step.conclusion ? step.conclusion.replace(/[.!?]+$/, '') + '. ' : '')) + outcome;
+        steps.append(item);
+    }
+    document.getElementById('reasoningTrace').textContent = !matching
+        ? 'La explicación guardada corresponde a otra prioridad y no se utiliza para justificar este resultado.'
+        : trace.length ? 'Se revisaron ' + trace.length + ' reglas y se activaron ' + active.length +
+          '. Las restantes no cumplieron sus condiciones, no contaron con los datos necesarios o no fueron necesarias para asignar el resultado. Cuando varias reglas proponen prioridades, se conserva la más urgente.'
+        : 'No se dispone del detalle de reglas para esta evaluación.';
+    const provenance = explanation?.procedencia_hechos || {};
+    for (const [name, value] of Object.entries(matching ? explanation?.hechos_finales || {} : {})) {
+        const origin = provenance[name] || {};
+        let description = factLabel(name, snapshot) + ': ' + factValue(name, value) + '. ';
+        if (Array.isArray(origin.hechos)) {
+            const contributors = origin.hechos.map(fact => factLabel(fact, snapshot));
+            description += contributors.length ? 'Se obtuvo al contar: ' + contributors.join('; ') + '.'
+                : 'No se detectaron condiciones que aportaran a este conteo.';
+        } else if (origin.reglas?.length) {
+            const producing = trace.filter(step => origin.reglas.includes(step.regla_id));
+            const observations = [...new Set(producing.flatMap(step => (step.condiciones_evaluadas || []).map(c => explainCondition(c, snapshot))))];
+            description += 'Es una conclusión del motor' + (observations.length ? ', deducida a partir de: ' + observations.join('; ') : '') + '.';
+        } else description += 'Es un dato registrado en el formulario del paciente.';
+        const item = document.createElement('li'); item.textContent = description; factsList.append(item);
+    }
+    if (!factsList.children.length) {
+        const item = document.createElement('li'); item.textContent = 'No se dispone de los datos y su origen para esta evaluación.'; factsList.append(item);
+    }
+    document.getElementById('snapshotDetails').hidden = !snapshot;
+    const ruleCount = (snapshot?.reglas?.length || 0) + (snapshot?.respaldo ? 1 : 0);
+    const extras = snapshot?.entradas_adicionales?.length || 0;
+    document.getElementById('reasoningSnapshot').textContent = snapshot
+        ? 'Se conservó una copia de la base de conocimiento utilizada' + (version ? ' (versión ' + version + ')' : '') +
+          (ruleCount ? ', con ' + ruleCount + ' reglas y ' + extras + (extras === 1 ? ' síntoma adicional' : ' síntomas adicionales') : '') +
+          '. Incluye los criterios, las prioridades y las recomendaciones disponibles en ese momento. Esta copia permite revisar el razonamiento original aunque el conocimiento se modifique después. No constituye una validación clínica.'
+        : '';
 }
 
 function updateHistorySelection() {
